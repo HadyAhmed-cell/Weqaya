@@ -59,6 +59,9 @@ namespace VirtualClinic.Controllers
          => await _userManager.FindByEmailAsync(email) != null;
 
 
+
+
+
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login([FromQuery] LoginDto loginDto)
         {

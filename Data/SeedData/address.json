@@ -1,0 +1,35 @@
+[
+  {
+    "City": "Cairo",
+    "Area": "Masr El-gdeda"
+  },
+  {
+    "City": "Cairo",
+    "Area": "Madinet Nasr"
+  },
+  {
+    "City": "Cairo",
+    "Area": "El Daher"
+  },
+  {
+    "City": "Cairo",
+    "Area": "Maadi"
+  },
+  {
+    "City": "Cairo",
+    "Area": "New Cairo"
+  },
+  {
+    "City": "Cairo",
+    "Area": "Zamalek"
+  },
+  {
+    "City": "Giza",
+    "Area": "AL-Haram"
+  },
+  {
+    "City": "Giza",
+    "Area": "October"
+  }
+
+]
