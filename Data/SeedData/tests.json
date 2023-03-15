@@ -1,0 +1,32 @@
+[
+  {
+    "TestsOrRisks": "Diabetes Test"
+  },
+  {
+    "TestsOrRisks": "Cardiac Risk"
+  },
+  {
+    "TestsOrRisks": "Cholestrol Test"
+  },
+  {
+    "TestsOrRisks": "Blood Sugar Fasting Test"
+  },
+  {
+    "TestsOrRisks": "2 HPP Blood Glucose Test"
+  },
+  {
+    "TestsOrRisks": "HbA1c Test"
+  },
+  {
+    "TestsOrRisks": "GFR Renal Test"
+  },
+  {
+    "TestsOrRisks": "Fundus Examination Test"
+  },
+  {
+    "TestsOrRisks": "TSH Free T4 Test"
+  },
+  {
+    "TestsOrRisks": "CBC Test"
+  }
+]

@@ -7,7 +7,7 @@ namespace VirtualClinic.Entities
         public string? Name { get; set; }
         public string? Gender { get; set; }
 
-        public DateTime DateOfBirth { get; set; }
+        public int Age { get; set; }
         public string? SocialStatus { get; set; }
 
         public int NoOfKids { get; set; }
@@ -17,18 +17,20 @@ namespace VirtualClinic.Entities
         public string? Syndicates { get; set; }
         public string? Email { get; set; }
         public string PhoneNumber { get; set; }
-        public string? Diseases { get; set; }
+
         public double PressureValue { get; set; }
         public string? Diabetes { get; set; }
+        public int? testsAndRisksId { get; set; }
+        public TestsAndRisks testsAndRisks { get; set; }
 
         public Address? Address { get; set; }
 
         public GeoLocation? GeoLocation { get; set; }
 
         [ValidateNever]
-        public IEnumerable<Doctor>? Doctors { get; set; }
+        public IEnumerable<DoctorPatient>? doctorPatients { get; set; }
 
         [ValidateNever]
-        public IEnumerable<Lab>? Labs { get; set; }
+        public IEnumerable<LabPatient> labPatients { get; set; }
     }
 }

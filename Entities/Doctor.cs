@@ -15,6 +15,6 @@
         public Address Address { get; set; }
 
         public GeoLocation GeoLocation { get; set; }
-        public IEnumerable<Patient> Patients { get; set; }
+        public IEnumerable<DoctorPatient> doctorPatients { get; set; }
     }
 }

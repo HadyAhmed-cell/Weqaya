@@ -30,6 +30,6 @@ namespace VirtualClinic.Entities
         public GeoLocation? GeoLocation { get; set; }
 
         [ValidateNever]
-        public IEnumerable<Patient> Patients { get; set; }
+        public IEnumerable<LabPatient> LabPatients { get; set; }
     }
 }

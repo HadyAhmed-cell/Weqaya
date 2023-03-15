@@ -9,13 +9,13 @@ namespace VirtualClinic.Data
         {
             try
             {
-                if ( !context.Genders.Any() )
+                if ( !context.testsAndRisks.Any() )
                 {
-                    var genderData = File.ReadAllText("../VirtualClinic/Data/SeedData/genders.json");
-                    var genders = JsonSerializer.Deserialize<List<GenderType>>(genderData);
-                    foreach ( var gender in genders )
+                    var testsData = File.ReadAllText("../VirtualClinic/Data/SeedData/tests.json");
+                    var tests = JsonSerializer.Deserialize<List<TestsAndRisks>>(testsData);
+                    foreach ( var test in tests )
                     {
-                        context.Genders.Add(gender);
+                        context.testsAndRisks.Add(test);
                     }
                     await context.SaveChangesAsync();
                 }

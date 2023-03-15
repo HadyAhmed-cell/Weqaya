@@ -1,19 +1,28 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace VirtualClinic.Migrations.Data
 {
     /// <inheritdoc />
-    public partial class AddingDoctorLabPatient : Migration
+    public partial class AddingTestsTableAndLabPatientTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+
+
             migrationBuilder.AlterColumn<string>(
-                name: "Genders",
-                table: "Genders",
+                name: "City",
+                table: "Addresses",
+                type: "nvarchar(max)",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Area",
+                table: "Addresses",
                 type: "nvarchar(max)",
                 nullable: true,
                 oldClrType: typeof(string),
@@ -34,6 +43,19 @@ namespace VirtualClinic.Migrations.Data
                 });
 
             migrationBuilder.CreateTable(
+                name: "testsAndRisks",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TestsOrRisks = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_testsAndRisks", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Doctors",
                 columns: table => new
                 {
@@ -43,7 +65,7 @@ namespace VirtualClinic.Migrations.Data
                     Speciality = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PHD = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Reviews = table.Column<double>(type: "float", nullable: false),
-                    PhoneNumber = table.Column<int>(type: "int", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AppoinmentsDatesAvailable = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Price = table.Column<double>(type: "float", nullable: false),
                     DoctorInfo = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -77,10 +99,10 @@ namespace VirtualClinic.Migrations.Data
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<double>(type: "float", nullable: false),
                     Reviews = table.Column<double>(type: "float", nullable: false),
-                    PhoneNumber = table.Column<int>(type: "int", nullable: false),
-                    LabDescript = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AddressId = table.Column<int>(type: "int", nullable: false),
-                    GeoLocationId = table.Column<int>(type: "int", nullable: false)
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LabDescript = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AddressId = table.Column<int>(type: "int", nullable: true),
+                    GeoLocationId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -89,14 +111,12 @@ namespace VirtualClinic.Migrations.Data
                         name: "FK_Labs_Addresses_AddressId",
                         column: x => x.AddressId,
                         principalTable: "Addresses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Labs_GeoLocation_GeoLocationId",
                         column: x => x.GeoLocationId,
                         principalTable: "GeoLocation",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -107,7 +127,7 @@ namespace VirtualClinic.Migrations.Data
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Gender = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Age = table.Column<int>(type: "int", nullable: false),
                     SocialStatus = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NoOfKids = table.Column<int>(type: "int", nullable: false),
                     Weight = table.Column<int>(type: "int", nullable: false),
@@ -115,10 +135,10 @@ namespace VirtualClinic.Migrations.Data
                     WaistDiameter = table.Column<int>(type: "int", nullable: false),
                     Syndicates = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<int>(type: "int", nullable: false),
-                    Diseases = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PressureValue = table.Column<double>(type: "float", nullable: false),
                     Diabetes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    testsAndRisksId = table.Column<int>(type: "int", nullable: true),
                     AddressId = table.Column<int>(type: "int", nullable: true),
                     GeoLocationId = table.Column<int>(type: "int", nullable: true)
                 },
@@ -135,60 +155,66 @@ namespace VirtualClinic.Migrations.Data
                         column: x => x.GeoLocationId,
                         principalTable: "GeoLocation",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Patients_testsAndRisks_testsAndRisksId",
+                        column: x => x.testsAndRisksId,
+                        principalTable: "testsAndRisks",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "DoctorPatient",
+                name: "DoctorPatients",
                 columns: table => new
                 {
-                    DoctorsId = table.Column<int>(type: "int", nullable: false),
-                    PatientsId = table.Column<int>(type: "int", nullable: false)
+                    doctorId = table.Column<int>(type: "int", nullable: false),
+                    patientId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DoctorPatient", x => new { x.DoctorsId, x.PatientsId });
+                    table.PrimaryKey("PK_DoctorPatients", x => new { x.doctorId, x.patientId });
                     table.ForeignKey(
-                        name: "FK_DoctorPatient_Doctors_DoctorsId",
-                        column: x => x.DoctorsId,
+                        name: "FK_DoctorPatients_Doctors_doctorId",
+                        column: x => x.doctorId,
                         principalTable: "Doctors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DoctorPatient_Patients_PatientsId",
-                        column: x => x.PatientsId,
+                        name: "FK_DoctorPatients_Patients_patientId",
+                        column: x => x.patientId,
                         principalTable: "Patients",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "LabPatient",
+                name: "LabPatients",
                 columns: table => new
                 {
-                    LabsId = table.Column<int>(type: "int", nullable: false),
-                    PatientsId = table.Column<int>(type: "int", nullable: false)
+                    LabId = table.Column<int>(type: "int", nullable: false),
+                    PatientId = table.Column<int>(type: "int", nullable: false),
+                    Results = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LabPatient", x => new { x.LabsId, x.PatientsId });
+                    table.PrimaryKey("PK_LabPatients", x => new { x.LabId, x.PatientId });
                     table.ForeignKey(
-                        name: "FK_LabPatient_Labs_LabsId",
-                        column: x => x.LabsId,
+                        name: "FK_LabPatients_Labs_LabId",
+                        column: x => x.LabId,
                         principalTable: "Labs",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_LabPatient_Patients_PatientsId",
-                        column: x => x.PatientsId,
+                        name: "FK_LabPatients_Patients_PatientId",
+                        column: x => x.PatientId,
                         principalTable: "Patients",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_DoctorPatient_PatientsId",
-                table: "DoctorPatient",
-                column: "PatientsId");
+                name: "IX_DoctorPatients_patientId",
+                table: "DoctorPatients",
+                column: "patientId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Doctors_AddressId",
@@ -201,9 +227,9 @@ namespace VirtualClinic.Migrations.Data
                 column: "GeoLocationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LabPatient_PatientsId",
-                table: "LabPatient",
-                column: "PatientsId");
+                name: "IX_LabPatients_PatientId",
+                table: "LabPatients",
+                column: "PatientId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Labs_AddressId",
@@ -224,16 +250,21 @@ namespace VirtualClinic.Migrations.Data
                 name: "IX_Patients_GeoLocationId",
                 table: "Patients",
                 column: "GeoLocationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Patients_testsAndRisksId",
+                table: "Patients",
+                column: "testsAndRisksId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "DoctorPatient");
+                name: "DoctorPatients");
 
             migrationBuilder.DropTable(
-                name: "LabPatient");
+                name: "LabPatients");
 
             migrationBuilder.DropTable(
                 name: "Doctors");
@@ -247,15 +278,41 @@ namespace VirtualClinic.Migrations.Data
             migrationBuilder.DropTable(
                 name: "GeoLocation");
 
+            migrationBuilder.DropTable(
+                name: "testsAndRisks");
+
             migrationBuilder.AlterColumn<string>(
-                name: "Genders",
-                table: "Genders",
+                name: "City",
+                table: "Addresses",
                 type: "nvarchar(max)",
                 nullable: false,
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
                 oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Area",
+                table: "Addresses",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "",
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)",
+                oldNullable: true);
+
+            migrationBuilder.CreateTable(
+                name: "Genders",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Genders = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Genders", x => x.Id);
+                });
         }
     }
 }
