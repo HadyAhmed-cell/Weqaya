@@ -11,14 +11,12 @@ namespace VirtualClinic.Data
         }
 
         public DbSet<TestsAndRisks> testsAndRisks { get; set; }
-        public DbSet<SocialStatusType> SocialStatus { get; set; }
-        public DbSet<SyndicatesTypes> Syndicates { get; set; }
-        public DbSet<Address> Addresses { get; set; }
         public DbSet<Doctor> Doctors { get; set; }
         public DbSet<Patient> Patients { get; set; }
         public DbSet<Lab> Labs { get; set; }
         public DbSet<LabPatient> LabPatients { get; set; }
         public DbSet<DoctorPatient> DoctorPatients { get; set; }
+        public DbSet<PatientTestsOrRisks> PatientTestsAndRisks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -49,6 +47,19 @@ namespace VirtualClinic.Data
                  .HasOne(lp => lp.patient)
                  .WithMany(l => l.doctorPatients)
                  .HasForeignKey(lp => lp.patientId);
+
+            modelBuilder.Entity<PatientTestsOrRisks>(e =>
+            {
+                e.HasKey(lp => new { lp.PatientId, lp.TestTestsAndRisksId });
+
+                e.HasOne(lp => lp.Patient)
+                .WithMany(lp => lp.PatientTestsAndRisks)
+                .HasForeignKey(lp => lp.PatientId);
+
+                e.HasOne(lp => lp.TestsAndRisks)
+                .WithMany(lp => lp.PatientTestsOrRisks)
+                .HasForeignKey(lp => lp.TestTestsAndRisksId);
+            });
         }
     }
 }

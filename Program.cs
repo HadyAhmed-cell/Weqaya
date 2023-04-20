@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Configuration;
+using System.Text.Json.Serialization;
 using VirtualClinic.Areas.Identity.Data;
 using VirtualClinic.Data;
+using VirtualClinic.Extensions;
 using VirtualClinic.Identity;
 using VirtualClinic.Interfaces;
 using VirtualClinic.Repositories;
@@ -11,9 +15,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
 
-builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultUI()
-    .AddDefaultTokenProviders();
+//builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>()
+//    .AddDefaultUI()
+//    .AddDefaultTokenProviders();
 
 builder.Services.AddAuthentication().AddGoogle(options =>
 {
@@ -23,13 +27,33 @@ builder.Services.AddAuthentication().AddGoogle(options =>
 builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("testConnection")));
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
-builder.Services.AddScoped(typeof(ILabService), typeof(LabService));
+//builder.Services.AddScoped(typeof(ILabService), typeof(LabService));
+builder.Services.AddScoped(typeof(ITokenService), typeof(TokenService));
+//builder.Services.Configure<ApiBehaviorOptions>(options =>
+//{
+//    options.InvalidModelStateResponseFactory = (actionContext) =>
+//    {
+//        var errors = actionContext.ModelState.Where(x=>x.Value.Errors.Count>0)
+//        .SelectMany(x=>x.Value.Errors)
+//        .Select(a=>a.ErrorMessage).ToArray();
+
+//        var errorResponse = new ApiValidationErrorResponse()
+//        {
+//            Errors = errors
+//        };
+//        return new BadRequestObjectResult(errorResponse);
+//    };
+//}
+//);
+//builder.Services.AddScoped(typeof(DataContext));
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerDocumentation();
+builder.Services.AddIdentityServices(builder.Configuration);
 
 var app = builder.Build();
 
@@ -60,6 +84,20 @@ catch ( Exception ex )
 {
     var logger = services.GetService<ILogger<Program>>();
     logger.LogError(ex, "An error occured during migration");
+}
+
+using ( var scope1 = app.Services.CreateScope() )
+{
+    var roleManager = scope1.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    var roles = new[] { "Admin", "Doctor", "Patient", "Lab" };
+    foreach ( var role in roles )
+    {
+        if ( !await roleManager.RoleExistsAsync(role) )
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
 }
 
 app.Run();

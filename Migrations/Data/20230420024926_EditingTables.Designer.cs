@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtualClinic.Data;
 
@@ -11,9 +12,11 @@ using VirtualClinic.Data;
 namespace VirtualClinic.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230420024926_EditingTables")]
+    partial class EditingTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,28 @@ namespace VirtualClinic.Migrations.Data
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("VirtualClinic.Entities.Address", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Area")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StreetAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Addresses");
+                });
 
             modelBuilder.Entity("VirtualClinic.Entities.Doctor", b =>
                 {
@@ -30,17 +55,14 @@ namespace VirtualClinic.Migrations.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("AddressId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("AppoinmentsDatesAvailable")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Area")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("Availability")
                         .HasColumnType("bit");
-
-                    b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DoctorInfo")
                         .HasColumnType("nvarchar(max)");
@@ -72,10 +94,9 @@ namespace VirtualClinic.Migrations.Data
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("StreetAddress")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("AddressId");
 
                     b.ToTable("Doctors");
                 });
@@ -103,11 +124,8 @@ namespace VirtualClinic.Migrations.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Area")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("AddressId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
@@ -129,10 +147,9 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<double>("Reviews")
                         .HasColumnType("float");
 
-                    b.Property<string>("StreetAddress")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("AddressId");
 
                     b.ToTable("Labs");
                 });
@@ -164,14 +181,11 @@ namespace VirtualClinic.Migrations.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Age")
+                    b.Property<int?>("AddressId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Area")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Age")
+                        .HasColumnType("int");
 
                     b.Property<bool?>("Diabetes")
                         .HasColumnType("bit");
@@ -218,9 +232,6 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<string>("SocialStatus")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("StreetAddress")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Syndicates")
                         .HasColumnType("nvarchar(max)");
 
@@ -231,6 +242,8 @@ namespace VirtualClinic.Migrations.Data
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AddressId");
 
                     b.ToTable("Patients");
                 });
@@ -250,6 +263,23 @@ namespace VirtualClinic.Migrations.Data
                     b.ToTable("PatientTestsAndRisks");
                 });
 
+            modelBuilder.Entity("VirtualClinic.Entities.SyndicatesTypes", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Syndicates")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Syndicates");
+                });
+
             modelBuilder.Entity("VirtualClinic.Entities.TestsAndRisks", b =>
                 {
                     b.Property<int>("Id")
@@ -265,6 +295,15 @@ namespace VirtualClinic.Migrations.Data
                     b.HasKey("Id");
 
                     b.ToTable("testsAndRisks");
+                });
+
+            modelBuilder.Entity("VirtualClinic.Entities.Doctor", b =>
+                {
+                    b.HasOne("VirtualClinic.Entities.Address", "Address")
+                        .WithMany()
+                        .HasForeignKey("AddressId");
+
+                    b.Navigation("Address");
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.DoctorPatient", b =>
@@ -286,6 +325,15 @@ namespace VirtualClinic.Migrations.Data
                     b.Navigation("patient");
                 });
 
+            modelBuilder.Entity("VirtualClinic.Entities.Lab", b =>
+                {
+                    b.HasOne("VirtualClinic.Entities.Address", "Address")
+                        .WithMany()
+                        .HasForeignKey("AddressId");
+
+                    b.Navigation("Address");
+                });
+
             modelBuilder.Entity("VirtualClinic.Entities.LabPatient", b =>
                 {
                     b.HasOne("VirtualClinic.Entities.Lab", "Lab")
@@ -303,6 +351,15 @@ namespace VirtualClinic.Migrations.Data
                     b.Navigation("Lab");
 
                     b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("VirtualClinic.Entities.Patient", b =>
+                {
+                    b.HasOne("VirtualClinic.Entities.Address", "Address")
+                        .WithMany()
+                        .HasForeignKey("AddressId");
+
+                    b.Navigation("Address");
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.PatientTestsOrRisks", b =>

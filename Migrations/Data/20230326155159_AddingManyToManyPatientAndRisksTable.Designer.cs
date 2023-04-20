@@ -12,8 +12,8 @@ using VirtualClinic.Data;
 namespace VirtualClinic.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230312162620_AddingTestsTableAndLabPatientTable")]
-    partial class AddingTestsTableAndLabPatientTable
+    [Migration("20230326155159_AddingManyToManyPatientAndRisksTable")]
+    partial class AddingManyToManyPatientAndRisksTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -210,6 +210,9 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<string>("Diabetes")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("DiabetesRelatives")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
@@ -221,6 +224,9 @@ namespace VirtualClinic.Migrations.Data
 
                     b.Property<int>("Height")
                         .HasColumnType("int");
+
+                    b.Property<bool>("MedicineForDiabetes")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -247,18 +253,31 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<int>("Weight")
                         .HasColumnType("int");
 
-                    b.Property<int?>("testsAndRisksId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AddressId");
 
                     b.HasIndex("GeoLocationId");
 
-                    b.HasIndex("testsAndRisksId");
-
                     b.ToTable("Patients");
+                });
+
+            modelBuilder.Entity("VirtualClinic.Entities.PatientTestsOrRisks", b =>
+                {
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TestTestsAndRisksId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.HasKey("PatientId", "TestTestsAndRisksId");
+
+                    b.HasIndex("TestTestsAndRisksId");
+
+                    b.ToTable("PatientTestsAndRisks");
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.SocialStatusType", b =>
@@ -394,15 +413,28 @@ namespace VirtualClinic.Migrations.Data
                         .WithMany()
                         .HasForeignKey("GeoLocationId");
 
-                    b.HasOne("VirtualClinic.Entities.TestsAndRisks", "testsAndRisks")
-                        .WithMany()
-                        .HasForeignKey("testsAndRisksId");
-
                     b.Navigation("Address");
 
                     b.Navigation("GeoLocation");
+                });
 
-                    b.Navigation("testsAndRisks");
+            modelBuilder.Entity("VirtualClinic.Entities.PatientTestsOrRisks", b =>
+                {
+                    b.HasOne("VirtualClinic.Entities.Patient", "Patient")
+                        .WithMany("PatientTestsAndRisks")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VirtualClinic.Entities.TestsAndRisks", "TestsAndRisks")
+                        .WithMany("PatientTestsOrRisks")
+                        .HasForeignKey("TestTestsAndRisksId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
+
+                    b.Navigation("TestsAndRisks");
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.Doctor", b =>
@@ -417,9 +449,16 @@ namespace VirtualClinic.Migrations.Data
 
             modelBuilder.Entity("VirtualClinic.Entities.Patient", b =>
                 {
+                    b.Navigation("PatientTestsAndRisks");
+
                     b.Navigation("doctorPatients");
 
                     b.Navigation("labPatients");
+                });
+
+            modelBuilder.Entity("VirtualClinic.Entities.TestsAndRisks", b =>
+                {
+                    b.Navigation("PatientTestsOrRisks");
                 });
 #pragma warning restore 612, 618
         }

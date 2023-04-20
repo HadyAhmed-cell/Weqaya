@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using VirtualClinic.Entities;
 using VirtualClinic.Identity;
 
 namespace VirtualClinic.Areas.Identity.Data;
@@ -14,6 +15,5 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-
     }
 }

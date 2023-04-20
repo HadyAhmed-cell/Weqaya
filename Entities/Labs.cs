@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
+using VirtualClinic.Identity;
 
 namespace VirtualClinic.Entities
 {
@@ -8,15 +10,16 @@ namespace VirtualClinic.Entities
         {
         }
 
-        public Lab(string name, double price, double reviews, string phoneNumber, string? labDescript, Address address, GeoLocation geoLocation)
+        public Lab(string name, double price, double reviews, string phoneNumber, string? labDescript, string city, string area, string street)
         {
             Name = name;
             Price = price;
             Reviews = reviews;
             PhoneNumber = phoneNumber;
             LabDescript = labDescript;
-            Address = address;
-            GeoLocation = geoLocation;
+            City = city;
+            Area = area;
+            StreetAddress = street;
         }
 
         public string Name { get; set; }
@@ -25,9 +28,12 @@ namespace VirtualClinic.Entities
         public string PhoneNumber { get; set; }
         public string? LabDescript { get; set; }
 
-        public Address? Address { get; set; }
+        [Editable(false)]
+        public string? Email { get; set; }
 
-        public GeoLocation? GeoLocation { get; set; }
+        public string? City { get; set; }
+        public string? Area { get; set; }
+        public string? StreetAddress { get; set; }
 
         [ValidateNever]
         public IEnumerable<LabPatient> LabPatients { get; set; }

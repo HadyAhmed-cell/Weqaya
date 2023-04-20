@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtualClinic.Data;
 
@@ -11,9 +12,11 @@ using VirtualClinic.Data;
 namespace VirtualClinic.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230420010410_AddingPatientNotes")]
+    partial class AddingPatientNotes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,25 @@ namespace VirtualClinic.Migrations.Data
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("VirtualClinic.Entities.Address", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Area")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Addresses");
+                });
 
             modelBuilder.Entity("VirtualClinic.Entities.Doctor", b =>
                 {
@@ -30,23 +52,23 @@ namespace VirtualClinic.Migrations.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("AddressId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("AppoinmentsDatesAvailable")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Area")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("Availability")
                         .HasColumnType("bit");
-
-                    b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DoctorInfo")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("GeoLocationId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -72,10 +94,11 @@ namespace VirtualClinic.Migrations.Data
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("StreetAddress")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("AddressId");
+
+                    b.HasIndex("GeoLocationId");
 
                     b.ToTable("Doctors");
                 });
@@ -95,6 +118,25 @@ namespace VirtualClinic.Migrations.Data
                     b.ToTable("DoctorPatients");
                 });
 
+            modelBuilder.Entity("VirtualClinic.Entities.GeoLocation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("lat")
+                        .HasColumnType("float");
+
+                    b.Property<double>("lng")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GeoLocation");
+                });
+
             modelBuilder.Entity("VirtualClinic.Entities.Lab", b =>
                 {
                     b.Property<int>("Id")
@@ -103,14 +145,14 @@ namespace VirtualClinic.Migrations.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Area")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("AddressId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("GeoLocationId")
+                        .HasColumnType("int");
 
                     b.Property<string>("LabDescript")
                         .HasColumnType("nvarchar(max)");
@@ -129,10 +171,11 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<double>("Reviews")
                         .HasColumnType("float");
 
-                    b.Property<string>("StreetAddress")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("AddressId");
+
+                    b.HasIndex("GeoLocationId");
 
                     b.ToTable("Labs");
                 });
@@ -164,14 +207,11 @@ namespace VirtualClinic.Migrations.Data
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Age")
+                    b.Property<int?>("AddressId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Area")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Age")
+                        .HasColumnType("int");
 
                     b.Property<bool?>("Diabetes")
                         .HasColumnType("bit");
@@ -185,6 +225,9 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<string>("Gender")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("GeoLocationId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Height")
                         .HasColumnType("int");
@@ -218,9 +261,6 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<string>("SocialStatus")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("StreetAddress")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Syndicates")
                         .HasColumnType("nvarchar(max)");
 
@@ -231,6 +271,10 @@ namespace VirtualClinic.Migrations.Data
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AddressId");
+
+                    b.HasIndex("GeoLocationId");
 
                     b.ToTable("Patients");
                 });
@@ -250,6 +294,40 @@ namespace VirtualClinic.Migrations.Data
                     b.ToTable("PatientTestsAndRisks");
                 });
 
+            modelBuilder.Entity("VirtualClinic.Entities.SocialStatusType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("SocialStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SocialStatus");
+                });
+
+            modelBuilder.Entity("VirtualClinic.Entities.SyndicatesTypes", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Syndicates")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Syndicates");
+                });
+
             modelBuilder.Entity("VirtualClinic.Entities.TestsAndRisks", b =>
                 {
                     b.Property<int>("Id")
@@ -265,6 +343,21 @@ namespace VirtualClinic.Migrations.Data
                     b.HasKey("Id");
 
                     b.ToTable("testsAndRisks");
+                });
+
+            modelBuilder.Entity("VirtualClinic.Entities.Doctor", b =>
+                {
+                    b.HasOne("VirtualClinic.Entities.Address", "Address")
+                        .WithMany()
+                        .HasForeignKey("AddressId");
+
+                    b.HasOne("VirtualClinic.Entities.GeoLocation", "GeoLocation")
+                        .WithMany()
+                        .HasForeignKey("GeoLocationId");
+
+                    b.Navigation("Address");
+
+                    b.Navigation("GeoLocation");
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.DoctorPatient", b =>
@@ -286,6 +379,21 @@ namespace VirtualClinic.Migrations.Data
                     b.Navigation("patient");
                 });
 
+            modelBuilder.Entity("VirtualClinic.Entities.Lab", b =>
+                {
+                    b.HasOne("VirtualClinic.Entities.Address", "Address")
+                        .WithMany()
+                        .HasForeignKey("AddressId");
+
+                    b.HasOne("VirtualClinic.Entities.GeoLocation", "GeoLocation")
+                        .WithMany()
+                        .HasForeignKey("GeoLocationId");
+
+                    b.Navigation("Address");
+
+                    b.Navigation("GeoLocation");
+                });
+
             modelBuilder.Entity("VirtualClinic.Entities.LabPatient", b =>
                 {
                     b.HasOne("VirtualClinic.Entities.Lab", "Lab")
@@ -303,6 +411,21 @@ namespace VirtualClinic.Migrations.Data
                     b.Navigation("Lab");
 
                     b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("VirtualClinic.Entities.Patient", b =>
+                {
+                    b.HasOne("VirtualClinic.Entities.Address", "Address")
+                        .WithMany()
+                        .HasForeignKey("AddressId");
+
+                    b.HasOne("VirtualClinic.Entities.GeoLocation", "GeoLocation")
+                        .WithMany()
+                        .HasForeignKey("GeoLocationId");
+
+                    b.Navigation("Address");
+
+                    b.Navigation("GeoLocation");
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.PatientTestsOrRisks", b =>

@@ -32,8 +32,8 @@ namespace VirtualClinic.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult> GetLabById(int id)
         {
-            Lab lab = _context.Labs.Include(a => a.Address)
-                .Include(g => g.GeoLocation)
+            Lab lab = _context.Labs
+                .Include(p => p.LabPatients).ThenInclude(p => p.Patient)
                 .FirstOrDefault(l => l.Id == id);
             if ( lab == null )
             {
@@ -56,7 +56,7 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult> UpdateLab([FromForm] Lab lab, int id)
+        public async Task<ActionResult> UpdateLab([FromQuery] Lab lab, int id)
         {
             if ( id != lab.Id )
             {
