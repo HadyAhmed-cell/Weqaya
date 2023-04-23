@@ -29,6 +29,12 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
 //builder.Services.AddScoped(typeof(ILabService), typeof(LabService));
 builder.Services.AddScoped(typeof(ITokenService), typeof(TokenService));
+//builder.Services.AddCors(options => options.AddPolicy("AllowAccess_To_API",
+//    policy => policy
+//    .AllowAnyOrigin()
+//    .AllowAnyHeader()
+//    .AllowAnyMethod()
+//    ));
 //builder.Services.Configure<ApiBehaviorOptions>(options =>
 //{
 //    options.InvalidModelStateResponseFactory = (actionContext) =>
@@ -57,12 +63,21 @@ builder.Services.AddIdentityServices(builder.Configuration);
 
 var app = builder.Build();
 
+//app.UseCors("AllowAccess_To_API");
+
 // Configure the HTTP request pipeline.
 if ( app.Environment.IsDevelopment() )
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCors(
+        options => options
+        .AllowAnyHeader()
+        .SetIsOriginAllowed(_ => true)
+        .AllowCredentials()
+        .AllowAnyMethod()
+    );
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

@@ -28,7 +28,7 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<UserDto>> Register([FromQuery] RegisterDto registerDto)
+        public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
             if ( CheckEmailExistsAsync(registerDto.Email).Result.Value )
             {
@@ -71,7 +71,7 @@ namespace VirtualClinic.Controllers
             return Ok(userDto);
         }
 
-        [HttpGet("Email Exists")]
+        [HttpGet("EmailExists")]
         public async Task<ActionResult<bool>> CheckEmailExistsAsync([FromQuery] string email)
          => await _userManager.FindByEmailAsync(email) != null;
 
