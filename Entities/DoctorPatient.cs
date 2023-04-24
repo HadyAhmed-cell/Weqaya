@@ -7,5 +7,6 @@
         public int patientId { get; set; }
 
         public Patient patient { get; set; }
+        public string? DoctorNotes { get; set; }
     }
 }

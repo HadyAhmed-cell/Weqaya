@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtualClinic.Data;
 
@@ -11,9 +12,11 @@ using VirtualClinic.Data;
 namespace VirtualClinic.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230424060305_AddingLabResults")]
+    partial class AddingLabResults
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -88,9 +91,6 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<int>("patientId")
                         .HasColumnType("int");
 
-                    b.Property<string>("DoctorNotes")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("doctorId", "patientId");
 
                     b.HasIndex("patientId");
@@ -149,6 +149,7 @@ namespace VirtualClinic.Migrations.Data
                         .HasColumnType("int");
 
                     b.Property<string>("Results")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("LabId", "PatientId");
@@ -194,6 +195,9 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<bool?>("HighPressure")
                         .HasColumnType("bit");
 
+                    b.Property<string>("LabResults")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool?>("MedicineForDiabetesOrPressure")
                         .HasColumnType("bit");
 
@@ -203,6 +207,9 @@ namespace VirtualClinic.Migrations.Data
 
                     b.Property<int?>("NoOfKids")
                         .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()

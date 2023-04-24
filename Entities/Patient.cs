@@ -23,7 +23,6 @@ namespace VirtualClinic.Entities
         public string? Email { get; set; }
 
         public string PhoneNumber { get; set; }
-        public string? Notes { get; set; }
 
         public bool? DiabetesRelatives { get; set; }
         public bool? RelativesWithHeartAttacksOrHighColestrol { get; set; }

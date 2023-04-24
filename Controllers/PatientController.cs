@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Numerics;
+using System.Security.Claims;
 using VirtualClinic.Data;
 using VirtualClinic.Entities;
 
@@ -18,7 +20,6 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> GetAllPatients()
         {
             var patients = await _context.Patients
@@ -27,6 +28,7 @@ namespace VirtualClinic.Controllers
             return Ok(patients);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{GetPatientById}")]
         public async Task<ActionResult> GetPatientById(int GetPatientById)
         {
@@ -38,9 +40,12 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreatePatient([FromQuery] Patient patient)
+        public async Task<ActionResult> CreatePatient([FromQuery] Patient patient)
         {
-            _context.Patients.Add(patient);
+            await _context.Patients.AddAsync(patient);
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            patient.Email = email;
+            await _context.SaveChangesAsync();
 
             return Ok(patient);
         }
@@ -48,6 +53,8 @@ namespace VirtualClinic.Controllers
         [HttpPut]
         public async Task<ActionResult> EditPatient([FromQuery] Patient patient)
         {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            patient.Email = email;
             _context.Patients.Update(patient);
             await _context.SaveChangesAsync();
             return Ok(patient);
@@ -215,6 +222,64 @@ namespace VirtualClinic.Controllers
             //_context.SaveChanges();
 
             return Ok();
+        }
+
+        [HttpPost("AssignDoctor")]
+        public async Task<ActionResult> AssignDoctor(int doctorId)
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var patient1 = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var doctor1 = await _context.Doctors.FirstOrDefaultAsync(x => x.Id == doctorId);
+            var userId = patient1.Id;
+            bool patientDoctor = await _context.DoctorPatients.AnyAsync(x => x.patientId == userId && x.doctorId == doctorId);
+            DoctorPatient doctorPatient = new()
+            {
+                doctorId = doctorId,
+                patientId = userId,
+                //doctor = doctor1,
+                //patient = patient1,
+                DoctorNotes = "No Notes For Now !"
+            };
+            if ( patientDoctor == true )
+            {
+                return BadRequest("Doctor Already Assigned !");
+            }
+            else
+            {
+                await _context.DoctorPatients.AddAsync(doctorPatient);
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok("Doctor Assigned Successfully !");
+        }
+
+        [HttpPost("AssignLab")]
+        public async Task<ActionResult> AssignLab(int labId)
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var patient1 = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var lab1 = await _context.Labs.FirstOrDefaultAsync(x => x.Id == labId);
+            var userId = patient1.Id;
+            bool patientLab = await _context.LabPatients.AnyAsync(x => x.PatientId == userId && x.LabId == labId);
+            LabPatient labPatient = new()
+            {
+                LabId = labId,
+                PatientId = userId,
+                //doctor = doctor1,
+                //patient = patient1,
+                Results = "No Results For Now !"
+            };
+            if ( patientLab == true )
+            {
+                return BadRequest("Lab Already Assigned !");
+            }
+            else
+            {
+                await _context.LabPatients.AddAsync(labPatient);
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok("Lab Assigned Successfully !");
         }
 
         //[HttpPut("{EditRecommendationId}")]

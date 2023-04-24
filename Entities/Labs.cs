@@ -6,22 +6,6 @@ namespace VirtualClinic.Entities
 {
     public class Lab : BaseEntity
     {
-        public Lab()
-        {
-        }
-
-        public Lab(string name, double price, double reviews, string phoneNumber, string? labDescript, string city, string area, string street)
-        {
-            Name = name;
-            Price = price;
-            Reviews = reviews;
-            PhoneNumber = phoneNumber;
-            LabDescript = labDescript;
-            City = city;
-            Area = area;
-            StreetAddress = street;
-        }
-
         public string Name { get; set; }
         public double Price { get; set; }
         public double Reviews { get; set; }

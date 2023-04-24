@@ -28,7 +28,7 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
+        public async Task<ActionResult<UserDto>> Register([FromQuery] RegisterDto registerDto)
         {
             if ( CheckEmailExistsAsync(registerDto.Email).Result.Value )
             {
@@ -51,6 +51,10 @@ namespace VirtualClinic.Controllers
             else if ( registerDto.Email.Split("@")[1] == "doctor.com" )
             {
                 await _userManager.AddToRoleAsync(user, "Doctor");
+            }
+            else if ( registerDto.Email.Split("@")[1] == "lab.com" )
+            {
+                await _userManager.AddToRoleAsync(user, "Lab");
             }
             else
             {
