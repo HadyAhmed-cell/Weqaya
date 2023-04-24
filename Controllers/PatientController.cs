@@ -39,7 +39,7 @@ namespace VirtualClinic.Controllers
             return Ok(patient);
         }
 
-        [HttpPost]
+        [HttpPost("AddPatient")]
         public async Task<ActionResult> CreatePatient([FromQuery] Patient patient)
         {
             await _context.Patients.AddAsync(patient);
@@ -50,13 +50,23 @@ namespace VirtualClinic.Controllers
             return Ok(patient);
         }
 
-        [HttpPut]
+        [HttpPut("EditPatientData")]
         public async Task<ActionResult> EditPatient([FromQuery] Patient patient)
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
             patient.Email = email;
             _context.Patients.Update(patient);
             await _context.SaveChangesAsync();
+            return Ok(patient);
+        }
+
+        [HttpGet("GetPatientProfile")]
+        public async Task<ActionResult> GetPatientProfile()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+            var patient = await _context.Patients.FirstOrDefaultAsync(x => x.Id == userId);
             return Ok(patient);
         }
 
@@ -253,6 +263,21 @@ namespace VirtualClinic.Controllers
             return Ok("Doctor Assigned Successfully !");
         }
 
+        [HttpGet("ViewDoctorsAssigned")]
+        public async Task<ActionResult> ViewDoctorsAssigned()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var doctorsAssigned = await _context.Patients
+                .Include(x => x.doctorPatients)
+                .ThenInclude(x => x.doctor)
+                .Where(o => o.Id == userId)
+                .ToListAsync();
+            return Ok(doctorsAssigned);
+        }
+
         [HttpPost("AssignLab")]
         public async Task<ActionResult> AssignLab(int labId)
         {
@@ -280,6 +305,21 @@ namespace VirtualClinic.Controllers
             }
 
             return Ok("Lab Assigned Successfully !");
+        }
+
+        [HttpGet("ViewLabsAssigned")]
+        public async Task<ActionResult> ViewLabsAssigned()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var labsAssigned = await _context.Patients
+                .Include(x => x.labPatients)
+                .ThenInclude(x => x.Lab)
+                .Where(o => o.Id == userId)
+                .ToListAsync();
+            return Ok(labsAssigned);
         }
 
         //[HttpPut("{EditRecommendationId}")]

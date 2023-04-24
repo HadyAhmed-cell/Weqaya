@@ -64,9 +64,13 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPost("DoctorNotes")]
-        public async Task<ActionResult> PostDoctorNotes(int id, string notes)
+        public async Task<ActionResult> PostDoctorNotes(int patientId, string notes)
         {
-            var patient = await _context.DoctorPatients.FirstOrDefaultAsync(x => x.patientId == id);
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var patient = await _context.DoctorPatients.FirstOrDefaultAsync(x => x.patientId == patientId && x.doctorId == userId);
             patient.DoctorNotes = notes;
             await _context.SaveChangesAsync();
             return Ok("Notes Added Successfully !");
