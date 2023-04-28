@@ -47,7 +47,7 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPost("AddLab")]
-        public async Task<ActionResult<Lab>> AddLab([FromQuery] Lab lab)
+        public async Task<ActionResult<Lab>> AddLab(Lab lab)
         {
             await _context.Labs.AddAsync(lab);
             string email = User.FindFirstValue(ClaimTypes.Email);
@@ -59,7 +59,7 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPut("EditLabData")]
-        public async Task<ActionResult> UpdateLab([FromQuery] Lab lab)
+        public async Task<ActionResult> UpdateLab(Lab lab)
         {
             if ( ModelState.IsValid )
             {

@@ -28,7 +28,7 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<UserDto>> Register([FromQuery] RegisterDto registerDto)
+        public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
             if ( CheckEmailExistsAsync(registerDto.Email).Result.Value )
             {
@@ -39,8 +39,6 @@ namespace VirtualClinic.Controllers
             {
                 UserName = registerDto.Email.Split("@")[0],
                 Email = registerDto.Email,
-                Fname = registerDto.FirstName,
-                Lname = registerDto.LastName,
             };
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
@@ -69,18 +67,17 @@ namespace VirtualClinic.Controllers
             var userDto = new UserDto()
             {
                 Email = registerDto.Email,
-                DisplayName = $"{user.Fname}",
                 Token = await _tokenService.CreateToken(user, _userManager)
             };
             return Ok(userDto);
         }
 
         [HttpGet("EmailExists")]
-        public async Task<ActionResult<bool>> CheckEmailExistsAsync([FromQuery] string email)
+        public async Task<ActionResult<bool>> CheckEmailExistsAsync(string email)
          => await _userManager.FindByEmailAsync(email) != null;
 
         [HttpPost("login")]
-        public async Task<ActionResult<UserDto>> Login([FromQuery] LoginDto loginDto)
+        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if ( user is null )
@@ -97,7 +94,6 @@ namespace VirtualClinic.Controllers
             var userDto = new UserDto()
             {
                 Email = loginDto.Email,
-                DisplayName = $"{user.Fname}",
                 Token = await _tokenService.CreateToken(user, _userManager)
             };
             return Ok(userDto);
@@ -111,7 +107,6 @@ namespace VirtualClinic.Controllers
             return Ok(new UserDto()
             {
                 Email = user.Email,
-                DisplayName = $"{user.Fname}",
                 Token = await _tokenService.CreateToken(user, _userManager)
             });
         }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtualClinic.Data;
 
@@ -11,9 +12,11 @@ using VirtualClinic.Data;
 namespace VirtualClinic.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230428193637_AddingNulls")]
+    partial class AddingNulls
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -73,9 +76,6 @@ namespace VirtualClinic.Migrations.Data
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StreetAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Syndicates")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -138,9 +138,6 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<string>("StreetAddress")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Syndicates")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
                     b.ToTable("Labs");
@@ -175,6 +172,12 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<int?>("Age")
                         .HasColumnType("int");
 
+                    b.Property<string>("Area")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool?>("Diabetes")
                         .HasColumnType("bit");
 
@@ -187,7 +190,7 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<string>("Gender")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Height")
+                    b.Property<int>("Height")
                         .HasColumnType("int");
 
                     b.Property<bool?>("HighPressure")
@@ -199,6 +202,9 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("NoOfKids")
+                        .HasColumnType("int");
+
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
@@ -208,7 +214,19 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<bool?>("Smoking")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("Weight")
+                    b.Property<string>("SocialStatus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StreetAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Syndicates")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("WaistDiameter")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Weight")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

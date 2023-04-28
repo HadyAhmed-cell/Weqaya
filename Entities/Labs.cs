@@ -11,6 +11,7 @@ namespace VirtualClinic.Entities
         public double Reviews { get; set; }
         public string PhoneNumber { get; set; }
         public string? LabDescript { get; set; }
+        public string? Syndicates { get; set; }
 
         [Editable(false)]
         public string? Email { get; set; }

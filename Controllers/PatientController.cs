@@ -40,7 +40,7 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPost("AddPatient")]
-        public async Task<ActionResult> CreatePatient([FromQuery] Patient patient)
+        public async Task<ActionResult> CreatePatient(Patient patient)
         {
             await _context.Patients.AddAsync(patient);
             string email = User.FindFirstValue(ClaimTypes.Email);
@@ -51,7 +51,7 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPut("EditPatientData")]
-        public async Task<ActionResult> EditPatient([FromQuery] Patient patient)
+        public async Task<ActionResult> EditPatient(Patient patient)
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
             patient.Email = email;

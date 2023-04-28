@@ -22,7 +22,6 @@ namespace VirtualClinic.Services
             var authClaims = new List<Claim>()
             {
                 new Claim(ClaimTypes.Email , user.Email),
-                new Claim(ClaimTypes.GivenName,user.Fname)
             };
 
             var userRoles = await userManager.GetRolesAsync(user);
