@@ -10,7 +10,7 @@ using VirtualClinic.Identity;
 
 namespace VirtualClinic.Controllers
 {
-    [Authorize(Roles = "Doctor")]
+    //[Authorize(Roles = "Doctor")]
     public class DoctorController : BaseApiController
     {
         private readonly DataContext _context;
@@ -89,6 +89,37 @@ namespace VirtualClinic.Controllers
             _context.DoctorPatients.RemoveRange(patientToDelete);
             await _context.SaveChangesAsync();
             return Ok("Patient Deleted Successfully !");
+        }
+
+        [HttpGet("SearchedDoctors")]
+        public async Task<ActionResult> SearchDoctors(string name = null, string specialty = null, string area = null)
+        {
+            IEnumerable<Doctor> doctors = _context.Doctors;
+
+            if ( specialty != null )
+            {
+                specialty = specialty.Trim();
+                doctors = doctors.Where(d => d.Speciality.Contains(specialty));
+            }
+
+            if ( name != null )
+            {
+                name = name.Trim();
+                doctors = doctors.Where(d => d.Name.Contains(name));
+            }
+
+            if ( area != null )
+            {
+                area = area.Trim();
+                doctors = doctors.Where(d => d.Area.Contains(area));
+            }
+
+            if ( !doctors.Any() )
+            {
+                return NotFound();
+            }
+
+            return Ok(doctors);
         }
     }
 }

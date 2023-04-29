@@ -1,12 +1,19 @@
-﻿namespace VirtualClinic.Entities
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
+namespace VirtualClinic.Entities
 {
     public class DoctorPatient
     {
         public int doctorId { get; set; }
-        public Doctor doctor { get; set; }
+
+        [ValidateNever]
+        public Doctor? doctor { get; set; }
+
         public int patientId { get; set; }
 
-        public Patient patient { get; set; }
+        [ValidateNever]
+        public Patient? patient { get; set; }
+
         public string? DoctorNotes { get; set; }
     }
 }
