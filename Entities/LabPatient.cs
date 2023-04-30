@@ -14,6 +14,7 @@ namespace VirtualClinic.Entities
         [ValidateNever]
         public Patient? Patient { get; set; }
 
+        [ValidateNever]
         public string? Results { get; set; }
     }
 }

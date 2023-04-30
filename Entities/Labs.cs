@@ -6,10 +6,10 @@ namespace VirtualClinic.Entities
 {
     public class Lab : BaseEntity
     {
-        public string Name { get; set; }
-        public double Price { get; set; }
-        public double Reviews { get; set; }
-        public string PhoneNumber { get; set; }
+        public string? Name { get; set; }
+        public double? Price { get; set; }
+        public double? Reviews { get; set; }
+        public string? PhoneNumber { get; set; }
         public string? LabDescript { get; set; }
         public string? Syndicates { get; set; }
 
@@ -21,6 +21,6 @@ namespace VirtualClinic.Entities
         public string? StreetAddress { get; set; }
 
         [ValidateNever]
-        public IEnumerable<LabPatient> LabPatients { get; set; }
+        public IEnumerable<LabPatient>? LabPatients { get; set; }
     }
 }

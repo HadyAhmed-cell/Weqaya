@@ -4,12 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using System.Numerics;
 using System.Security.Claims;
 using VirtualClinic.Data;
+using VirtualClinic.Dto;
 using VirtualClinic.Entities;
 using VirtualClinic.Interfaces;
 
 namespace VirtualClinic.Controllers
 {
-    [Authorize(Roles = "Lab")]
+    //[Authorize(Roles = "Lab")]
     public class LabController : BaseApiController
     {
         private readonly IGenericRepository<Lab> _labRepo;
@@ -47,7 +48,7 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPost("AddLab")]
-        public async Task<ActionResult<Lab>> AddLab(Lab lab)
+        public async Task<ActionResult> AddLab(Lab lab)
         {
             await _context.Labs.AddAsync(lab);
             string email = User.FindFirstValue(ClaimTypes.Email);
