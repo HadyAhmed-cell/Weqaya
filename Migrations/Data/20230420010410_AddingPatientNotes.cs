@@ -25,14 +25,6 @@ namespace VirtualClinic.Migrations.Data
                 type: "nvarchar(max)",
                 nullable: true);
 
-            migrationBuilder.AlterColumn<byte[]>(
-                name: "ProfilePhoto",
-                table: "Doctors",
-                type: "varbinary(max)",
-                nullable: true,
-                oldClrType: typeof(byte[]),
-                oldType: "varbinary(max)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "PHD",
                 table: "Doctors",
@@ -102,16 +94,6 @@ namespace VirtualClinic.Migrations.Data
             migrationBuilder.DropColumn(
                 name: "Notes",
                 table: "Patients");
-
-            migrationBuilder.AlterColumn<byte[]>(
-                name: "ProfilePhoto",
-                table: "Doctors",
-                type: "varbinary(max)",
-                nullable: false,
-                defaultValue: new byte[0],
-                oldClrType: typeof(byte[]),
-                oldType: "varbinary(max)",
-                oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
                 name: "PHD",

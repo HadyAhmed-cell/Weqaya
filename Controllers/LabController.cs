@@ -120,5 +120,34 @@ namespace VirtualClinic.Controllers
             await _context.SaveChangesAsync();
             return Ok("Patient Deleted Successfully !");
         }
+
+        [HttpPost("ChooseTests")]
+        public async Task<ActionResult> ChooseTest(int testId, double price)
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var lab = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
+            var test = await _context.testsAndRisks.FirstOrDefaultAsync(x => x.Id == testId);
+            var userId = lab.Id;
+            bool LabTests = await _context.LabsTestsAndRisks.AnyAsync(x => x.LabId == userId && x.TestsAndRisksId == testId);
+            LabsTestsAndRisks labsTestsAndRisks = new()
+            {
+                TestsAndRisksId = testId,
+                LabId = userId,
+                //doctor = doctor1,
+                //patient = patient1,
+                Price = price
+            };
+            if ( LabTests == true )
+            {
+                return BadRequest("Test Already Priced !");
+            }
+            else
+            {
+                await _context.LabsTestsAndRisks.AddAsync(labsTestsAndRisks);
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok("Test Price Assigned Successfully !");
+        }
     }
 }

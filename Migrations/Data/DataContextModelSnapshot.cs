@@ -117,17 +117,12 @@ namespace VirtualClinic.Migrations.Data
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double>("Price")
-                        .HasColumnType("float");
-
-                    b.Property<double>("Reviews")
+                    b.Property<double?>("Reviews")
                         .HasColumnType("float");
 
                     b.Property<string>("StreetAddress")
@@ -157,6 +152,24 @@ namespace VirtualClinic.Migrations.Data
                     b.HasIndex("PatientId");
 
                     b.ToTable("LabPatients");
+                });
+
+            modelBuilder.Entity("VirtualClinic.Entities.LabsTestsAndRisks", b =>
+                {
+                    b.Property<int>("LabId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TestsAndRisksId")
+                        .HasColumnType("int");
+
+                    b.Property<double?>("Price")
+                        .HasColumnType("float");
+
+                    b.HasKey("LabId", "TestsAndRisksId");
+
+                    b.HasIndex("TestsAndRisksId");
+
+                    b.ToTable("LabsTestsAndRisks");
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.Patient", b =>
@@ -281,6 +294,25 @@ namespace VirtualClinic.Migrations.Data
                     b.Navigation("Patient");
                 });
 
+            modelBuilder.Entity("VirtualClinic.Entities.LabsTestsAndRisks", b =>
+                {
+                    b.HasOne("VirtualClinic.Entities.Lab", "Lab")
+                        .WithMany("LabsTestsAndRisks")
+                        .HasForeignKey("LabId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VirtualClinic.Entities.TestsAndRisks", "TestsAndRisks")
+                        .WithMany("LabsTestsAndRisks")
+                        .HasForeignKey("TestsAndRisksId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lab");
+
+                    b.Navigation("TestsAndRisks");
+                });
+
             modelBuilder.Entity("VirtualClinic.Entities.PatientTestsOrRisks", b =>
                 {
                     b.HasOne("VirtualClinic.Entities.Patient", "Patient")
@@ -308,6 +340,8 @@ namespace VirtualClinic.Migrations.Data
             modelBuilder.Entity("VirtualClinic.Entities.Lab", b =>
                 {
                     b.Navigation("LabPatients");
+
+                    b.Navigation("LabsTestsAndRisks");
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.Patient", b =>
@@ -321,6 +355,8 @@ namespace VirtualClinic.Migrations.Data
 
             modelBuilder.Entity("VirtualClinic.Entities.TestsAndRisks", b =>
                 {
+                    b.Navigation("LabsTestsAndRisks");
+
                     b.Navigation("PatientTestsOrRisks");
                 });
 #pragma warning restore 612, 618
