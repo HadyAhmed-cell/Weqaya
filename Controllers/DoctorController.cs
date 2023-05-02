@@ -92,7 +92,7 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpGet("SearchedDoctors")]
-        public async Task<ActionResult> SearchDoctors(string name = null, string specialty = null, string area = null)
+        public async Task<ActionResult> SearchDoctors(string specialty = null, string area = null, string name = null)
         {
             IEnumerable<Doctor> doctors = _context.Doctors;
 
