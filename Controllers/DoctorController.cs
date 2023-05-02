@@ -99,19 +99,19 @@ namespace VirtualClinic.Controllers
             if ( specialty != null )
             {
                 specialty = specialty.Trim();
-                doctors = doctors.Where(d => d.Speciality.Contains(specialty));
+                doctors = doctors.Where(d => d.Speciality.Equals(specialty, StringComparison.OrdinalIgnoreCase));
             }
 
             if ( name != null )
             {
                 name = name.Trim();
-                doctors = doctors.Where(d => d.Name.Contains(name));
+                doctors = doctors.Where(d => d.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
             }
 
             if ( area != null )
             {
                 area = area.Trim();
-                doctors = doctors.Where(d => d.Area.Contains(area));
+                doctors = doctors.Where(d => d.Area.Equals(area, StringComparison.OrdinalIgnoreCase));
             }
 
             if ( !doctors.Any() )
