@@ -51,11 +51,13 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPut("EditPatientData")]
-        public async Task<ActionResult> EditPatient(Patient patient)
+        public async Task<ActionResult> EditPatient(Patient patient, int id)
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
             patient.Email = email;
+            patient.Id = id;
             _context.Patients.Update(patient);
+
             await _context.SaveChangesAsync();
             return Ok(patient);
         }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Text;
 using VirtualClinic.Data;
 using VirtualClinic.Entities;
 using VirtualClinic.Identity;
@@ -23,9 +24,18 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPost("AddDoctor")]
-        public async Task<ActionResult> AddDoctor(Doctor doctor)
+        public async Task<ActionResult> AddDoctor(Doctor doctor/*, IFormFile file*/)
         {
+            //if ( file == null || file.Length == 0 )
+            //    return BadRequest("No file uploaded.");
+
+            //var stream = new MemoryStream();
+
+            //await file.CopyToAsync(stream);
+            //doctor.Photo = stream.ToArray();
+
             await _context.Doctors.AddAsync(doctor);
+            doctor.Photo = new byte[byte.MaxValue];
             string email = User.FindFirstValue(ClaimTypes.Email);
             doctor.Email = email;
             await _context.SaveChangesAsync();
@@ -50,16 +60,26 @@ namespace VirtualClinic.Controllers
             string email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
-            var patients = await _context.Doctors
-                .Include(p => p.doctorPatients)
-                .ThenInclude(o => o.patient)
-                .Where(i => i.Id == userId)
-                .ToListAsync();
+            var patients = await _context.DoctorPatients.Where(p => p.doctorId == userId).ToListAsync();
+
+            var appointments = await _context.Appointments.Where(n => n.DoctorId == userId).ToListAsync();
 
             if ( user == null )
             {
                 return NotFound();
             }
+            return Ok(user);
+        }
+
+        [HttpGet("ViewDoctorPatients")]
+        public async Task<ActionResult> ViewPatients()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var patients = await _context.DoctorPatients.Where(n => n.doctorId == userId).ToListAsync();
+
             return Ok(patients);
         }
 
@@ -120,6 +140,31 @@ namespace VirtualClinic.Controllers
             }
 
             return Ok(doctors);
+        }
+
+        [HttpPost("Appointments")]
+        public async Task<ActionResult> AppointmentAdd(ICollection<string> appointments)
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            Doctor doctor = await _context.Doctors.Include(a => a.Appointments).SingleOrDefaultAsync(x => x.Id == userId);
+            _context.Appointments.RemoveRange(doctor.Appointments);
+            _context.SaveChanges();
+
+            foreach ( string appointment in appointments )
+            {
+                Appointment appointment1 = new Appointment
+                {
+                    AppointmentDateTime = DateTime.Parse(appointment),
+                    DoctorId = userId,
+                };
+                await _context.Appointments.AddAsync(appointment1);
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok("Appointments Dates Added !");
         }
     }
 }

@@ -18,6 +18,7 @@ namespace VirtualClinic.Data
         public DbSet<DoctorPatient> DoctorPatients { get; set; }
         public DbSet<PatientTestsOrRisks> PatientTestsAndRisks { get; set; }
         public DbSet<LabsTestsAndRisks> LabsTestsAndRisks { get; set; }
+        public DbSet<Appointment> Appointments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -73,6 +74,11 @@ namespace VirtualClinic.Data
                 .WithMany(lp => lp.LabsTestsAndRisks)
                 .HasForeignKey(lp => lp.TestsAndRisksId);
             });
+
+            modelBuilder.Entity<Doctor>()
+            .HasMany(d => d.Appointments)
+            .WithOne(a => a.Doctor)
+            .HasForeignKey(a => a.DoctorId);
         }
     }
 }

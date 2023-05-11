@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtualClinic.Data;
 
@@ -11,9 +12,11 @@ using VirtualClinic.Data;
 namespace VirtualClinic.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230511161455_AddingPhotoAndAppointments")]
+    partial class AddingPhotoAndAppointments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,7 +60,10 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<string>("DoctorInfo")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Duration")
+                    b.Property<int?>("DurationFrom")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DurationTo")
                         .HasColumnType("int");
 
                     b.Property<string>("Education")
@@ -87,12 +93,6 @@ namespace VirtualClinic.Migrations.Data
 
                     b.Property<string>("SubSpeciatlity")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("TimeFrom")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TimeTo")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
