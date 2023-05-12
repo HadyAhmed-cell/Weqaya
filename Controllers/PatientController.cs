@@ -382,69 +382,6 @@ namespace VirtualClinic.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
-
-            //var stream = new MemoryStream();
-
-            //await file.CopyToAsync(stream);
-            //var img = Image.FromStream(stream);
-            //var ocr = new IronTesseract();
-            //var input = new OcrInput(img);
-
-            //input.Deskew();
-
-            //var result = ocr.Read(input);
-            //await Console.Out.WriteLineAsync(result.Text);
-            //return Ok(result.Text);
-            //    if ( file == null || file.Length == 0 )
-            //    {
-            //        return BadRequest("No file was uploaded.");
-            //    }
-
-            //    var stream = new MemoryStream();
-
-            //    await file.CopyToAsync(stream);
-            //    var img1 = stream.ToArray();
-
-            //    try
-            //    {
-            //        using var engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.TesseractAndLstm);
-            //        using var img = Pix.LoadFromMemory(img1);
-            //        img.Deskew();
-            //        img.ConvertRGBToGray();
-            //        using var page = engine.Process(img);
-            //        var text = page.GetText();
-
-            //        return Ok(page.GetText());
-            //    }
-            //    catch ( Exception ex )
-            //    {
-            //        return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            //    }
-            //}
-
-            //public string ExtractTextFromImage(IFormFile file)
-            //{
-            //    string extractedText = string.Empty;
-
-            //    using ( var engine = new TesseractEngine("./tessdata", "eng", EngineMode.Default) )
-            //    {
-            //        using ( var imgStream = new MemoryStream() )
-            //        {
-            //            file.CopyTo(imgStream);
-            //            imgStream.Position = 0;
-
-            //            using ( var img = Pix.LoadFromMemory(imgStream.ToArray()) )
-            //            {
-            //                using ( var page = engine.Process(img) )
-            //                {
-            //                    extractedText = page.GetText();
-            //                }
-            //            }
-            //        }
-            //    }
-
-            //    return extractedText;
-            //}
         }
     }
 }
