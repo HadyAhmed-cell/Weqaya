@@ -1,22 +1,37 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Amazon;
+using Amazon.Textract;
+using Amazon.Textract.Model;
+using IronOcr;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
+using Tesseract;
 using VirtualClinic.Data;
 using VirtualClinic.Entities;
+using Image = System.Drawing.Image;
+using Rectangle = System.Drawing.Rectangle;
 
 namespace VirtualClinic.Controllers
 {
     public class PatientController : BaseApiController
     {
         private readonly DataContext _context;
+        private readonly IAmazonTextract _amazonTextract;
+        private readonly IWebHostEnvironment _environment;
 
         public PatientController(DataContext context)
         {
             _context = context;
+            _amazonTextract = new AmazonTextractClient("AKIAZLG4KFFZOPTXFC4I", "6b8yDSvsQQbV9iY7cWNiKkhnhIOBJC/Zgl0ubb+X", RegionEndpoint.USEast1);
         }
 
         [HttpGet]
@@ -322,6 +337,114 @@ namespace VirtualClinic.Controllers
                 .Where(o => o.Id == userId)
                 .ToListAsync();
             return Ok(labsAssigned);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> OCR(IFormFile image)
+        {
+            if ( image == null || image.Length == 0 )
+            {
+                return BadRequest("Image file is required.");
+            }
+
+            using var memoryStream = new MemoryStream();
+            await image.CopyToAsync(memoryStream);
+
+            var request = new DetectDocumentTextRequest
+            {
+                Document = new Document
+                {
+                    Bytes = memoryStream
+                }
+            };
+
+            try
+            {
+                var response = await _amazonTextract.DetectDocumentTextAsync(request);
+
+                var extractedText = "";
+                foreach ( var block in response.Blocks )
+                {
+                    if ( block.BlockType == BlockType.LINE )
+                    {
+                        extractedText += block.Text + Environment.NewLine;
+                    }
+                }
+
+                if ( extractedText.Contains("CBC") )
+                {
+                    await Console.Out.WriteLineAsync("U have to CBC Test");
+                }
+
+                return Ok(extractedText);
+            }
+            catch ( Exception ex )
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+
+            //var stream = new MemoryStream();
+
+            //await file.CopyToAsync(stream);
+            //var img = Image.FromStream(stream);
+            //var ocr = new IronTesseract();
+            //var input = new OcrInput(img);
+
+            //input.Deskew();
+
+            //var result = ocr.Read(input);
+            //await Console.Out.WriteLineAsync(result.Text);
+            //return Ok(result.Text);
+            //    if ( file == null || file.Length == 0 )
+            //    {
+            //        return BadRequest("No file was uploaded.");
+            //    }
+
+            //    var stream = new MemoryStream();
+
+            //    await file.CopyToAsync(stream);
+            //    var img1 = stream.ToArray();
+
+            //    try
+            //    {
+            //        using var engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.TesseractAndLstm);
+            //        using var img = Pix.LoadFromMemory(img1);
+            //        img.Deskew();
+            //        img.ConvertRGBToGray();
+            //        using var page = engine.Process(img);
+            //        var text = page.GetText();
+
+            //        return Ok(page.GetText());
+            //    }
+            //    catch ( Exception ex )
+            //    {
+            //        return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            //    }
+            //}
+
+            //public string ExtractTextFromImage(IFormFile file)
+            //{
+            //    string extractedText = string.Empty;
+
+            //    using ( var engine = new TesseractEngine("./tessdata", "eng", EngineMode.Default) )
+            //    {
+            //        using ( var imgStream = new MemoryStream() )
+            //        {
+            //            file.CopyTo(imgStream);
+            //            imgStream.Position = 0;
+
+            //            using ( var img = Pix.LoadFromMemory(imgStream.ToArray()) )
+            //            {
+            //                using ( var page = engine.Process(img) )
+            //                {
+            //                    extractedText = page.GetText();
+            //                }
+            //            }
+            //        }
+            //    }
+
+            //    return extractedText;
+            //}
         }
     }
 }

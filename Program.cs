@@ -1,3 +1,4 @@
+using Amazon.Textract;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,7 @@ builder.Services.AddAuthentication().AddGoogle(options =>
 builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("testConnection")));
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
+builder.Services.AddSingleton(typeof(IAmazonTextract), typeof(AmazonTextractClient));
 //builder.Services.AddScoped(typeof(ILabService), typeof(LabService));
 builder.Services.AddScoped(typeof(ITokenService), typeof(TokenService));
 //builder.Services.AddCors(options => options.AddPolicy("AllowAccess_To_API",
