@@ -3,6 +3,7 @@ using Amazon.Textract;
 using Amazon.Textract.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using VirtualClinic.Data;
@@ -329,6 +330,9 @@ namespace VirtualClinic.Controllers
         [HttpPost]
         public async Task<ActionResult> OCR(IFormFile image)
         {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
             if ( image == null || image.Length == 0 )
             {
                 return BadRequest("Image file is required.");
@@ -339,7 +343,7 @@ namespace VirtualClinic.Controllers
 
             var request = new DetectDocumentTextRequest
             {
-                Document = new Document
+                Document = new Amazon.Textract.Model.Document
                 {
                     Bytes = memoryStream
                 }
@@ -358,12 +362,107 @@ namespace VirtualClinic.Controllers
                     }
                 }
 
-                if ( extractedText.Contains("CBC") )
+                if ( extractedText.Contains("Diabetes", StringComparison.OrdinalIgnoreCase) )
                 {
-                    await Console.Out.WriteLineAsync("U have to CBC Test");
+                    var riskid = 1;
+                    var patientRisk = new PatientTestsOrRisks
+                    {
+                        PatientId = userId,
+                        TestTestsAndRisksId = riskid,
+                    };
+                    _context.PatientTestsAndRisks.Add(patientRisk);
+                    _context.SaveChanges();
+                }
+                if ( extractedText.Contains("Blood Sugar Fasting", StringComparison.OrdinalIgnoreCase) )
+                {
+                    var riskid = 4;
+                    var patientRisk = new PatientTestsOrRisks
+                    {
+                        PatientId = userId,
+                        TestTestsAndRisksId = riskid,
+                    };
+                    _context.PatientTestsAndRisks.Add(patientRisk);
+                    _context.SaveChanges();
+                }
+                if ( extractedText.Contains("2 HPP Blood Glucose", StringComparison.OrdinalIgnoreCase) )
+                {
+                    var riskid = 5;
+                    var patientRisk = new PatientTestsOrRisks
+                    {
+                        PatientId = userId,
+                        TestTestsAndRisksId = riskid,
+                    };
+                    _context.PatientTestsAndRisks.Add(patientRisk);
+                    _context.SaveChanges();
+                }
+                if ( extractedText.Contains("HbA1c", StringComparison.OrdinalIgnoreCase) )
+                {
+                    var riskid = 6;
+                    var patientRisk = new PatientTestsOrRisks
+                    {
+                        PatientId = userId,
+                        TestTestsAndRisksId = riskid,
+                    };
+                    _context.PatientTestsAndRisks.Add(patientRisk);
+                    _context.SaveChanges();
+                }
+                if ( extractedText.Contains("GFR Renal", StringComparison.OrdinalIgnoreCase) )
+                {
+                    var riskid = 7;
+                    var patientRisk = new PatientTestsOrRisks
+                    {
+                        PatientId = userId,
+                        TestTestsAndRisksId = riskid,
+                    };
+                    _context.PatientTestsAndRisks.Add(patientRisk);
+                    _context.SaveChanges();
+                }
+                if ( extractedText.Contains("Fundus Examination", StringComparison.OrdinalIgnoreCase) )
+                {
+                    var riskid = 8;
+                    var patientRisk = new PatientTestsOrRisks
+                    {
+                        PatientId = userId,
+                        TestTestsAndRisksId = riskid,
+                    };
+                    _context.PatientTestsAndRisks.Add(patientRisk);
+                    _context.SaveChanges();
+                }
+                if ( extractedText.Contains("TSH Free T4", StringComparison.OrdinalIgnoreCase) )
+                {
+                    var riskid = 9;
+                    var patientRisk = new PatientTestsOrRisks
+                    {
+                        PatientId = userId,
+                        TestTestsAndRisksId = riskid,
+                    };
+                    _context.PatientTestsAndRisks.Add(patientRisk);
+                    _context.SaveChanges();
+                }
+                if ( extractedText.Contains("CBC", StringComparison.OrdinalIgnoreCase) )
+                {
+                    var riskid = 10;
+                    var patientRisk = new PatientTestsOrRisks
+                    {
+                        PatientId = userId,
+                        TestTestsAndRisksId = riskid,
+                    };
+                    _context.PatientTestsAndRisks.Add(patientRisk);
+                    _context.SaveChanges();
+                }
+                if ( extractedText.Contains("Cholestrol", StringComparison.OrdinalIgnoreCase) )
+                {
+                    var riskid = 3;
+                    var patientRisk = new PatientTestsOrRisks
+                    {
+                        PatientId = userId,
+                        TestTestsAndRisksId = riskid,
+                    };
+                    _context.PatientTestsAndRisks.Add(patientRisk);
+                    _context.SaveChanges();
                 }
 
-                return Ok(extractedText);
+                return Ok("Tests Scanned Successfully !");
             }
             catch ( Exception ex )
             {
