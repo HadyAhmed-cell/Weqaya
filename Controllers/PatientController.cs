@@ -1,24 +1,12 @@
 ﻿using Amazon;
 using Amazon.Textract;
 using Amazon.Textract.Model;
-using IronOcr;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Security.Claims;
-using Tesseract;
 using VirtualClinic.Data;
 using VirtualClinic.Entities;
-using Image = System.Drawing.Image;
-using Rectangle = System.Drawing.Rectangle;
 
 namespace VirtualClinic.Controllers
 {
@@ -26,7 +14,6 @@ namespace VirtualClinic.Controllers
     {
         private readonly DataContext _context;
         private readonly IAmazonTextract _amazonTextract;
-        private readonly IWebHostEnvironment _environment;
 
         public PatientController(DataContext context)
         {
