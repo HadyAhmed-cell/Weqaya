@@ -42,6 +42,22 @@ namespace VirtualClinic.Controllers
             return Ok(patient);
         }
 
+        [HttpGet("GetPatientTests")]
+        public async Task<ActionResult> GetPatientTests()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+            var testsIds = from ptr in _context.PatientTestsAndRisks
+                           where ptr.PatientId == userId
+                           select ptr.TestTestsAndRisksId;
+
+            var tests = from tr in _context.testsAndRisks
+                        where testsIds.Contains(tr.Id)
+                        select tr.TestsOrRisks;
+            return Ok(tests);
+        }
+
         [HttpPost("AddPatient")]
         public async Task<ActionResult> CreatePatient(Patient patient)
         {
@@ -87,7 +103,7 @@ namespace VirtualClinic.Controllers
             _context.PatientTestsAndRisks.RemoveRange(patient.PatientTestsAndRisks);
             _context.SaveChanges();
 
-            if ( patient.Age >= 45 && patient.Diabetes == true )
+            if ( patient.Age >= 45 && (patient.Diabetes == true || patient.DiabetesRelatives == true) )
             {
                 if ( !_context.PatientTestsAndRisks.Any(x => x.TestTestsAndRisksId == 1 && x.PatientId == PatientRecommendId) )
                 {
@@ -240,7 +256,7 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPost("AssignDoctor")]
-        public async Task<ActionResult> AssignDoctor(int doctorId)
+        public async Task<ActionResult> AssignDoctor(int doctorId, [FromBody] string appointments)
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
             var patient1 = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
@@ -251,6 +267,7 @@ namespace VirtualClinic.Controllers
             {
                 doctorId = doctorId,
                 patientId = userId,
+                AppointmentDate = DateTime.Parse(appointments),
                 //doctor = doctor1,
                 //patient = patient1,
                 DoctorNotes = "No Notes For Now !"
@@ -275,12 +292,25 @@ namespace VirtualClinic.Controllers
             var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
 
-            var doctorsAssigned = await _context.Patients
-                .Include(x => x.doctorPatients)
-                .ThenInclude(x => x.doctor)
-                .Where(o => o.Id == userId)
-                .ToListAsync();
-            return Ok(doctorsAssigned);
+            var ids = from ptr in _context.DoctorPatients
+                      where ptr.patientId == userId
+                      select ptr.doctorId;
+
+            var doctors = from tr in _context.Doctors
+                          from ty in _context.DoctorPatients
+                          where ids.Contains(tr.Id) && ty.patientId == userId && ids.Contains(ty.doctorId)
+                          select new
+                          {
+                              DoctorAssigned = tr.Name,
+                              Appointment = ty.AppointmentDate.ToString()
+                          }
+                          ;
+
+            var appointments = from ty in _context.DoctorPatients
+                               where ty.patientId == userId && ids.Contains(ty.doctorId)
+                               select ty.AppointmentDate;
+
+            return Ok(doctors);
         }
 
         [HttpPost("AssignLab")]
@@ -319,20 +349,22 @@ namespace VirtualClinic.Controllers
             var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
 
-            var labsAssigned = await _context.Patients
-                .Include(x => x.labPatients)
-                .ThenInclude(x => x.Lab)
-                .Where(o => o.Id == userId)
-                .ToListAsync();
-            return Ok(labsAssigned);
+            var ids = from ptr in _context.LabPatients
+                      where ptr.PatientId == userId
+                      select ptr.LabId;
+
+            var labs = from tr in _context.Labs
+                       where ids.Contains(tr.Id)
+                       select tr;
+            return Ok(labs);
         }
 
         [HttpPost]
         public async Task<ActionResult> OCR(IFormFile image)
         {
-            string email = User.FindFirstValue(ClaimTypes.Email);
-            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
-            var userId = user.Id;
+            //string email = User.FindFirstValue(ClaimTypes.Email);
+            //var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            //var userId = user.Id;
             if ( image == null || image.Length == 0 )
             {
                 return BadRequest("Image file is required.");
@@ -362,112 +394,158 @@ namespace VirtualClinic.Controllers
                     }
                 }
 
-                if ( extractedText.Contains("Diabetes", StringComparison.OrdinalIgnoreCase) )
-                {
-                    var riskid = 1;
-                    var patientRisk = new PatientTestsOrRisks
-                    {
-                        PatientId = userId,
-                        TestTestsAndRisksId = riskid,
-                    };
-                    _context.PatientTestsAndRisks.Add(patientRisk);
-                    _context.SaveChanges();
-                }
-                if ( extractedText.Contains("Blood Sugar Fasting", StringComparison.OrdinalIgnoreCase) )
-                {
-                    var riskid = 4;
-                    var patientRisk = new PatientTestsOrRisks
-                    {
-                        PatientId = userId,
-                        TestTestsAndRisksId = riskid,
-                    };
-                    _context.PatientTestsAndRisks.Add(patientRisk);
-                    _context.SaveChanges();
-                }
-                if ( extractedText.Contains("2 HPP Blood Glucose", StringComparison.OrdinalIgnoreCase) )
-                {
-                    var riskid = 5;
-                    var patientRisk = new PatientTestsOrRisks
-                    {
-                        PatientId = userId,
-                        TestTestsAndRisksId = riskid,
-                    };
-                    _context.PatientTestsAndRisks.Add(patientRisk);
-                    _context.SaveChanges();
-                }
-                if ( extractedText.Contains("HbA1c", StringComparison.OrdinalIgnoreCase) )
-                {
-                    var riskid = 6;
-                    var patientRisk = new PatientTestsOrRisks
-                    {
-                        PatientId = userId,
-                        TestTestsAndRisksId = riskid,
-                    };
-                    _context.PatientTestsAndRisks.Add(patientRisk);
-                    _context.SaveChanges();
-                }
-                if ( extractedText.Contains("GFR Renal", StringComparison.OrdinalIgnoreCase) )
-                {
-                    var riskid = 7;
-                    var patientRisk = new PatientTestsOrRisks
-                    {
-                        PatientId = userId,
-                        TestTestsAndRisksId = riskid,
-                    };
-                    _context.PatientTestsAndRisks.Add(patientRisk);
-                    _context.SaveChanges();
-                }
-                if ( extractedText.Contains("Fundus Examination", StringComparison.OrdinalIgnoreCase) )
-                {
-                    var riskid = 8;
-                    var patientRisk = new PatientTestsOrRisks
-                    {
-                        PatientId = userId,
-                        TestTestsAndRisksId = riskid,
-                    };
-                    _context.PatientTestsAndRisks.Add(patientRisk);
-                    _context.SaveChanges();
-                }
-                if ( extractedText.Contains("TSH Free T4", StringComparison.OrdinalIgnoreCase) )
-                {
-                    var riskid = 9;
-                    var patientRisk = new PatientTestsOrRisks
-                    {
-                        PatientId = userId,
-                        TestTestsAndRisksId = riskid,
-                    };
-                    _context.PatientTestsAndRisks.Add(patientRisk);
-                    _context.SaveChanges();
-                }
-                if ( extractedText.Contains("CBC", StringComparison.OrdinalIgnoreCase) )
-                {
-                    var riskid = 10;
-                    var patientRisk = new PatientTestsOrRisks
-                    {
-                        PatientId = userId,
-                        TestTestsAndRisksId = riskid,
-                    };
-                    _context.PatientTestsAndRisks.Add(patientRisk);
-                    _context.SaveChanges();
-                }
-                if ( extractedText.Contains("Cholestrol", StringComparison.OrdinalIgnoreCase) )
-                {
-                    var riskid = 3;
-                    var patientRisk = new PatientTestsOrRisks
-                    {
-                        PatientId = userId,
-                        TestTestsAndRisksId = riskid,
-                    };
-                    _context.PatientTestsAndRisks.Add(patientRisk);
-                    _context.SaveChanges();
-                }
+                //if ( extractedText.Contains("Diabetes", StringComparison.OrdinalIgnoreCase) )
+                //{
+                //    var riskid = 1;
+                //    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                //    if ( !LabTests )
+                //    {
+                //        var patientRisk = new PatientTestsOrRisks
+                //        {
+                //            PatientId = userId,
+                //            TestTestsAndRisksId = riskid,
+                //        };
+                //        _context.PatientTestsAndRisks.Add(patientRisk);
+                //        _context.SaveChanges();
+                //    }
+                //}
+                //if ( extractedText.Contains("Blood Sugar Fasting", StringComparison.OrdinalIgnoreCase) )
+                //{
+                //    var riskid = 4;
+                //    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                //    if ( !LabTests )
+                //    {
+                //        var patientRisk = new PatientTestsOrRisks
+                //        {
+                //            PatientId = userId,
+                //            TestTestsAndRisksId = riskid,
+                //        };
+                //        _context.PatientTestsAndRisks.Add(patientRisk);
+                //        _context.SaveChanges();
+                //    }
+                //}
+                //if ( extractedText.Contains("2 HPP Blood Glucose", StringComparison.OrdinalIgnoreCase) )
+                //{
+                //    var riskid = 5;
+                //    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                //    if ( !LabTests )
+                //    {
+                //        var patientRisk = new PatientTestsOrRisks
+                //        {
+                //            PatientId = userId,
+                //            TestTestsAndRisksId = riskid,
+                //        };
+                //        _context.PatientTestsAndRisks.Add(patientRisk);
+                //        _context.SaveChanges();
+                //    }
+                //}
+                //if ( extractedText.Contains("HbA1c", StringComparison.OrdinalIgnoreCase) )
+                //{
+                //    var riskid = 6;
+                //    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                //    if ( !LabTests )
+                //    {
+                //        var patientRisk = new PatientTestsOrRisks
+                //        {
+                //            PatientId = userId,
+                //            TestTestsAndRisksId = riskid,
+                //        };
+                //        _context.PatientTestsAndRisks.Add(patientRisk);
+                //        _context.SaveChanges();
+                //    }
+                //}
+                //if ( extractedText.Contains("GFR Renal", StringComparison.OrdinalIgnoreCase) )
+                //{
+                //    var riskid = 7;
+                //    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                //    if ( !LabTests )
+                //    {
+                //        var patientRisk = new PatientTestsOrRisks
+                //        {
+                //            PatientId = userId,
+                //            TestTestsAndRisksId = riskid,
+                //        };
+                //        _context.PatientTestsAndRisks.Add(patientRisk);
+                //        _context.SaveChanges();
+                //    }
+                //}
+                //if ( extractedText.Contains("Fundus Examination", StringComparison.OrdinalIgnoreCase) )
+                //{
+                //    var riskid = 8;
+                //    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                //    if ( !LabTests )
+                //    {
+                //        var patientRisk = new PatientTestsOrRisks
+                //        {
+                //            PatientId = userId,
+                //            TestTestsAndRisksId = riskid,
+                //        };
+                //        _context.PatientTestsAndRisks.Add(patientRisk);
+                //        _context.SaveChanges();
+                //    }
+                //}
+                //if ( extractedText.Contains("TSH Free T4", StringComparison.OrdinalIgnoreCase) )
+                //{
+                //    var riskid = 9;
+                //    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                //    if ( !LabTests )
+                //    {
+                //        var patientRisk = new PatientTestsOrRisks
+                //        {
+                //            PatientId = userId,
+                //            TestTestsAndRisksId = riskid,
+                //        };
+                //        _context.PatientTestsAndRisks.Add(patientRisk);
+                //        _context.SaveChanges();
+                //    }
+                //}
+                //if ( extractedText.Contains("CBC", StringComparison.OrdinalIgnoreCase) )
+                //{
+                //    var riskid = 10;
+                //    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                //    if ( !LabTests )
+                //    {
+                //        var patientRisk = new PatientTestsOrRisks
+                //        {
+                //            PatientId = userId,
+                //            TestTestsAndRisksId = riskid,
+                //        };
+                //        _context.PatientTestsAndRisks.Add(patientRisk);
+                //        _context.SaveChanges();
+                //    }
+                //}
+                //if ( extractedText.Contains("Cholestrol", StringComparison.OrdinalIgnoreCase) )
+                //{
+                //    var riskid = 3;
+                //    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                //    if ( !LabTests )
+                //    {
+                //        var patientRisk = new PatientTestsOrRisks
+                //        {
+                //            PatientId = userId,
+                //            TestTestsAndRisksId = riskid,
+                //        };
+                //        _context.PatientTestsAndRisks.Add(patientRisk);
+                //        _context.SaveChanges();
+                //    }
+                //}
 
-                return Ok("Tests Scanned Successfully !");
+                return Ok(extractedText);
             }
             catch ( Exception ex )
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
+        }
+
+        [HttpGet("GetDatesAvailable")]
+        public async Task<ActionResult> GetDates(int id)
+        {
+            var datesAvailable = from ptr in _context.Appointments
+                                 where ptr.DoctorId == id
+                                 select ptr.AppointmentDateTime.ToString();
+
+            return Ok(datesAvailable);
         }
     }
 }

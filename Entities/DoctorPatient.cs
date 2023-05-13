@@ -15,5 +15,7 @@ namespace VirtualClinic.Entities
         public Patient? patient { get; set; }
 
         public string? DoctorNotes { get; set; }
+
+        public DateTime? AppointmentDate { get; set; }
     }
 }

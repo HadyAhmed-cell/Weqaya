@@ -7,8 +7,6 @@ namespace VirtualClinic.Entities
     public class Lab : BaseEntity
     {
         public string? Name { get; set; }
-        public double? Reviews { get; set; }
-        public string? PhoneNumber { get; set; }
         public string? LabDescript { get; set; }
 
         [Editable(false)]
@@ -20,6 +18,8 @@ namespace VirtualClinic.Entities
 
         [ValidateNever]
         public IEnumerable<LabPatient>? LabPatients { get; set; }
+
+        public ICollection<LabReviews>? Reviews { get; set; }
 
         [ValidateNever]
         public IEnumerable<LabsTestsAndRisks>? LabsTestsAndRisks { get; set; }

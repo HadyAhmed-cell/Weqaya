@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtualClinic.Data;
 
@@ -11,9 +12,11 @@ using VirtualClinic.Data;
 namespace VirtualClinic.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230513113551_AddingReviewsTable")]
+    partial class AddingReviewsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -103,9 +106,6 @@ namespace VirtualClinic.Migrations.Data
 
                     b.Property<int>("patientId")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("AppointmentDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("DoctorNotes")
                         .HasColumnType("nvarchar(max)");

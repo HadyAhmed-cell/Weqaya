@@ -53,6 +53,7 @@ namespace VirtualClinic.Controllers
             await _context.Labs.AddAsync(lab);
             string email = User.FindFirstValue(ClaimTypes.Email);
             lab.Email = email;
+            lab.Photo = new byte[byte.MaxValue];
 
             await _context.SaveChangesAsync();
 

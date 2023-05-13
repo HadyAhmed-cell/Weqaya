@@ -79,6 +79,14 @@ namespace VirtualClinic.Data
             .HasMany(d => d.Appointments)
             .WithOne(a => a.Doctor)
             .HasForeignKey(a => a.DoctorId);
+            modelBuilder.Entity<Doctor>()
+            .HasMany(d => d.Reviews)
+            .WithOne(a => a.Doctor)
+            .HasForeignKey(a => a.DoctorId);
+            modelBuilder.Entity<Lab>()
+            .HasMany(d => d.Reviews)
+            .WithOne(a => a.Lab)
+            .HasForeignKey(a => a.LabId);
         }
     }
 }
