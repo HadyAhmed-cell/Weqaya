@@ -104,7 +104,7 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<int>("patientId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("AppointmentDate")
+                    b.Property<DateTime>("AppointmentDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DoctorNotes")
@@ -158,6 +158,9 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<byte[]>("Photo")
                         .HasColumnType("varbinary(max)");
 
@@ -177,14 +180,8 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<int>("PatientId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Price")
-                        .HasColumnType("int");
-
                     b.Property<string>("Results")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TestId")
-                        .HasColumnType("int");
 
                     b.HasKey("LabId", "PatientId");
 
@@ -359,17 +356,21 @@ namespace VirtualClinic.Migrations.Data
 
             modelBuilder.Entity("VirtualClinic.Entities.LabPatient", b =>
                 {
-                    b.HasOne("VirtualClinic.Entities.Lab", null)
+                    b.HasOne("VirtualClinic.Entities.Lab", "Lab")
                         .WithMany("LabPatients")
                         .HasForeignKey("LabId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("VirtualClinic.Entities.Patient", null)
+                    b.HasOne("VirtualClinic.Entities.Patient", "Patient")
                         .WithMany("labPatients")
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Lab");
+
+                    b.Navigation("Patient");
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.LabReviews", b =>

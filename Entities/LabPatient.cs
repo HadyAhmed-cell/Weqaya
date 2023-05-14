@@ -16,8 +16,5 @@ namespace VirtualClinic.Entities
 
         [ValidateNever]
         public string? Results { get; set; }
-
-        public int Price { get; set; }
-        public int TestId { get; set; }
     }
 }

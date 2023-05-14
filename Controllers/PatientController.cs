@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
-using NuGet.Packaging.Signing;
 using System.Security.Claims;
 using VirtualClinic.Data;
 using VirtualClinic.Entities;
@@ -71,28 +70,15 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPut("EditPatientData")]
-        public async Task<ActionResult> EditPatient(Patient patient)
+        public async Task<ActionResult> EditPatient(Patient patient, int id)
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
-            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
-            var userId = user.Id;
-
-            user.Id = userId;
-            user.Name = patient.Name;
-            user.Age = patient.Age;
-            user.Weight = patient.Weight;
-            user.PhoneNumber = patient.PhoneNumber;
-            user.DiabetesRelatives = patient.DiabetesRelatives;
-            user.RelativesWithHeartAttacksOrHighColestrol = patient.RelativesWithHeartAttacksOrHighColestrol;
-            user.Smoking = patient.Smoking;
-            user.MedicineForDiabetesOrPressure = patient.MedicineForDiabetesOrPressure;
-            user.HighPressure = patient.HighPressure;
-            user.Diabetes = patient.Diabetes;
-            user.Email = email;
+            patient.Email = email;
+            patient.Id = id;
+            _context.Patients.Update(patient);
 
             await _context.SaveChangesAsync();
-
-            return Ok("Patient Updated");
+            return Ok(patient);
         }
 
         [HttpGet("GetPatientProfile")]
@@ -313,34 +299,32 @@ namespace VirtualClinic.Controllers
             var doctors = from tr in _context.Doctors
                           from ty in _context.DoctorPatients
                           where ids.Contains(tr.Id) && ty.patientId == userId && ids.Contains(ty.doctorId)
-                          group tr by tr.Id into g
                           select new
                           {
-                              DoctorAssigned = g.FirstOrDefault().Name,
-                              Appointment = g.FirstOrDefault().doctorPatients.FirstOrDefault().AppointmentDate.ToString(),
-                              Specialization = g.FirstOrDefault().Speciality,
-                              SubSpeciality = g.FirstOrDefault().SubSpeciatlity
+                              DoctorAssigned = tr.Name,
+                              Appointment = ty.AppointmentDate.ToString()
                           }
                           ;
+
+            var appointments = from ty in _context.DoctorPatients
+                               where ty.patientId == userId && ids.Contains(ty.doctorId)
+                               select ty.AppointmentDate;
 
             return Ok(doctors);
         }
 
         [HttpPost("AssignLab")]
-        public async Task<ActionResult> AssignLab(int labId, int testId, int price)
+        public async Task<ActionResult> AssignLab(int labId)
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
             var patient1 = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var lab1 = await _context.Labs.FirstOrDefaultAsync(x => x.Id == labId);
             var userId = patient1.Id;
-            bool patientLab = (from pr in _context.LabPatients
-                               where pr.LabId == labId && pr.TestId == testId
-                               select pr).Any();
+            bool patientLab = await _context.LabPatients.AnyAsync(x => x.PatientId == userId && x.LabId == labId);
             LabPatient labPatient = new()
             {
                 LabId = labId,
                 PatientId = userId,
-                TestId = testId,
-                Price = price,
                 //doctor = doctor1,
                 //patient = patient1,
                 Results = "No Results For Now !"
@@ -369,17 +353,10 @@ namespace VirtualClinic.Controllers
                       where ptr.PatientId == userId
                       select ptr.LabId;
 
-            var results = from lp in _context.LabPatients
-                          join t in _context.testsAndRisks on lp.TestId equals t.Id
-                          join l in _context.Labs on lp.LabId equals l.Id
-                          where lp.PatientId == userId
-                          select new
-                          {
-                              lp.Price,
-                              TestName = t.TestsOrRisks,
-                              LabName = l.Name
-                          };
-            return Ok(results);
+            var labs = from tr in _context.Labs
+                       where ids.Contains(tr.Id)
+                       select tr;
+            return Ok(labs);
         }
 
         [HttpPost]

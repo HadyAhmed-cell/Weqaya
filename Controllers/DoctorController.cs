@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Numerics;
 using System.Security.Claims;
 using System.Text;
 using VirtualClinic.Data;
@@ -25,8 +24,16 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPost("AddDoctor")]
-        public async Task<ActionResult> AddDoctor(Doctor doctor)
+        public async Task<ActionResult> AddDoctor(Doctor doctor/*, IFormFile file*/)
         {
+            //if ( file == null || file.Length == 0 )
+            //    return BadRequest("No file uploaded.");
+
+            //var stream = new MemoryStream();
+
+            //await file.CopyToAsync(stream);
+            //doctor.Photo = stream.ToArray();
+
             await _context.Doctors.AddAsync(doctor);
             doctor.Photo = new byte[byte.MaxValue];
             string email = User.FindFirstValue(ClaimTypes.Email);
@@ -34,24 +41,6 @@ namespace VirtualClinic.Controllers
             await _context.SaveChangesAsync();
 
             return Ok("Doctor Added Successfully !");
-        }
-
-        [HttpPost("AddPhoto")]
-        public async Task<ActionResult> AddPhoto(IFormFile file)
-        {
-            string email = User.FindFirstValue(ClaimTypes.Email);
-            var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
-            var userId = user.Id;
-            var doctor = await _context.Doctors.SingleOrDefaultAsync(x => x.Id == userId);
-            if ( file == null || file.Length == 0 )
-                return BadRequest("No file uploaded.");
-
-            var stream = new MemoryStream();
-
-            await file.CopyToAsync(stream);
-            doctor.Photo = stream.ToArray();
-            await _context.SaveChangesAsync();
-            return Ok("Photo Upploaded Successfully");
         }
 
         [HttpPost("EditDoctor")]
@@ -89,25 +78,7 @@ namespace VirtualClinic.Controllers
             var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
 
-            var ids = from ptr in _context.DoctorPatients
-                      where ptr.doctorId == userId
-                      select ptr.patientId;
-
-            var patients = from tr in _context.Patients
-                           from ty in _context.DoctorPatients
-                           where ids.Contains(tr.Id) && ty.doctorId == userId && ids.Contains(ty.patientId)
-                           group tr by tr.Id into g
-                           select new
-                           {
-                               PatientAssigned = g.FirstOrDefault().Name,
-                               Gender = g.FirstOrDefault().Gender,
-                               Age = g.FirstOrDefault().Age,
-                               Height = g.FirstOrDefault().Height,
-                               Weight = g.FirstOrDefault().Weight,
-                               PhoneNumber = g.FirstOrDefault().PhoneNumber,
-                               Appointment = g.FirstOrDefault().doctorPatients.FirstOrDefault().AppointmentDate.ToString(),
-                           }
-                          ;
+            var patients = await _context.DoctorPatients.Where(n => n.doctorId == userId).ToListAsync();
 
             return Ok(patients);
         }
