@@ -81,17 +81,68 @@ namespace VirtualClinic.Controllers
             string email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
-            var patients = await _context.Labs
-                .Include(p => p.LabPatients)
-                .ThenInclude(o => o.Patient)
+            var currentLab = await _context.Labs
                 .Where(i => i.Id == userId)
-                .ToListAsync();
+                .SingleOrDefaultAsync();
 
             if ( user == null )
             {
                 return NotFound();
             }
+            return Ok(currentLab);
+        }
+
+        [HttpGet("GetLabPatients")]
+        public async Task<ActionResult> ViewPatients()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var ids = from ptr in _context.LabPatients
+                      where ptr.LabId == userId
+                      select ptr.PatientId;
+
+            var patients = from tr in _context.Patients
+                           from ty in _context.LabPatients
+                           where ids.Contains(tr.Id) && ty.LabId == userId && ids.Contains(ty.PatientId)
+                           group tr by tr.Id into g
+                           select new
+                           {
+                               PatientAssigned = g.FirstOrDefault().Name,
+                               Gender = g.FirstOrDefault().Gender,
+                               Age = g.FirstOrDefault().Age,
+                               Height = g.FirstOrDefault().Height,
+                               Weight = g.FirstOrDefault().Weight,
+                               PhoneNumber = g.FirstOrDefault().PhoneNumber,
+                           }
+                          ;
+
             return Ok(patients);
+        }
+
+        [HttpGet("GetLabTests")]
+        public async Task<ActionResult> GetLabTests()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var ids = from ptr in _context.LabsTestsAndRisks
+                      where ptr.LabId == userId
+                      select ptr.TestsAndRisksId;
+
+            var tests = from tr in _context.testsAndRisks
+                        join ty in _context.LabsTestsAndRisks on tr.Id equals ty.TestsAndRisksId
+                        where ty.LabId == userId
+                        group tr by tr.Id into g
+                        select new
+                        {
+                            TestsAvailable = g.FirstOrDefault().TestsOrRisks,
+                            Price = g.FirstOrDefault().LabsTestsAndRisks.FirstOrDefault().Price
+                        };
+
+            return Ok(tests);
         }
 
         [HttpPost("LabResults")]

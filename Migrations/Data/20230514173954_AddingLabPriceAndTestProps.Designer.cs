@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtualClinic.Data;
 
@@ -11,9 +12,11 @@ using VirtualClinic.Data;
 namespace VirtualClinic.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230514173954_AddingLabPriceAndTestProps")]
+    partial class AddingLabPriceAndTestProps
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -359,17 +362,21 @@ namespace VirtualClinic.Migrations.Data
 
             modelBuilder.Entity("VirtualClinic.Entities.LabPatient", b =>
                 {
-                    b.HasOne("VirtualClinic.Entities.Lab", null)
+                    b.HasOne("VirtualClinic.Entities.Lab", "Lab")
                         .WithMany("LabPatients")
                         .HasForeignKey("LabId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("VirtualClinic.Entities.Patient", null)
+                    b.HasOne("VirtualClinic.Entities.Patient", "Patient")
                         .WithMany("labPatients")
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Lab");
+
+                    b.Navigation("Patient");
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.LabReviews", b =>
