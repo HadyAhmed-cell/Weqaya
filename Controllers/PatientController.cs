@@ -70,15 +70,27 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPut("EditPatientData")]
-        public async Task<ActionResult> EditPatient(Patient patient, int id)
+        public async Task<ActionResult> EditPatient(Patient patient)
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
             patient.Email = email;
-            patient.Id = id;
-            _context.Patients.Update(patient);
+            user.Id = userId;
+            user.Id = userId;
+            user.Name = patient.Name;
+            user.Weight = patient.Weight;
+            user.Height = patient.Height;
+            user.PhoneNumber = patient.PhoneNumber;
+            user.DiabetesRelatives = patient.DiabetesRelatives;
+            user.RelativesWithHeartAttacksOrHighColestrol = patient.RelativesWithHeartAttacksOrHighColestrol;
+            user.Smoking = patient.Smoking;
+            user.MedicineForDiabetesOrPressure = patient.MedicineForDiabetesOrPressure;
+            user.HighPressure = patient.HighPressure;
+            user.Diabetes = patient.Diabetes;
 
             await _context.SaveChangesAsync();
-            return Ok(patient);
+            return Ok("Patient Updated");
         }
 
         [HttpGet("GetPatientProfile")]
@@ -299,22 +311,20 @@ namespace VirtualClinic.Controllers
             var doctors = from tr in _context.Doctors
                           from ty in _context.DoctorPatients
                           where ids.Contains(tr.Id) && ty.patientId == userId && ids.Contains(ty.doctorId)
+                          group tr by tr.Id into g
                           select new
                           {
-                              DoctorAssigned = tr.Name,
-                              Appointment = ty.AppointmentDate.ToString()
-                          }
-                          ;
-
-            var appointments = from ty in _context.DoctorPatients
-                               where ty.patientId == userId && ids.Contains(ty.doctorId)
-                               select ty.AppointmentDate;
+                              DoctorAssigned = g.FirstOrDefault().Name,
+                              Appointment = g.FirstOrDefault().doctorPatients.FirstOrDefault().AppointmentDate.ToString(),
+                              Specialization = g.FirstOrDefault().Speciality,
+                              SubSpeciality = g.FirstOrDefault().SubSpeciatlity
+                          };
 
             return Ok(doctors);
         }
 
         [HttpPost("AssignLab")]
-        public async Task<ActionResult> AssignLab(int labId)
+        public async Task<ActionResult> AssignLab(int labId, int testId, int price)
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
             var patient1 = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
@@ -325,8 +335,8 @@ namespace VirtualClinic.Controllers
             {
                 LabId = labId,
                 PatientId = userId,
-                //doctor = doctor1,
-                //patient = patient1,
+                TestId = testId,
+                Price = price,
                 Results = "No Results For Now !"
             };
             if ( patientLab == true )
@@ -353,10 +363,17 @@ namespace VirtualClinic.Controllers
                       where ptr.PatientId == userId
                       select ptr.LabId;
 
-            var labs = from tr in _context.Labs
-                       where ids.Contains(tr.Id)
-                       select tr;
-            return Ok(labs);
+            var results = from lp in _context.LabPatients
+                          join t in _context.testsAndRisks on lp.TestId equals t.Id
+                          join l in _context.Labs on lp.LabId equals l.Id
+                          where lp.PatientId == user.Id
+                          select new
+                          {
+                              lp.Price,
+                              TestName = t.TestsOrRisks,
+                              LabName = l.Name
+                          };
+            return Ok(results);
         }
 
         [HttpPost]

@@ -81,17 +81,54 @@ namespace VirtualClinic.Controllers
             string email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
-            var patients = await _context.Labs
-                .Include(p => p.LabPatients)
-                .ThenInclude(o => o.Patient)
-                .Where(i => i.Id == userId)
-                .ToListAsync();
+            var labProfile = await _context.Labs
+.SingleOrDefaultAsync();
 
-            if ( user == null )
-            {
-                return NotFound();
-            }
-            return Ok(patients);
+            return Ok(labProfile);
+        }
+
+        [HttpGet("GetLabTests")]
+        public async Task<ActionResult> GetLabTests()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var tests = from tr in _context.testsAndRisks
+                        join ty in _context.LabsTestsAndRisks on tr.Id equals ty.TestsAndRisksId
+                        where ty.LabId == userId
+                        group tr by tr.Id into g
+                        select new
+                        {
+                            TestsAvailable = g.FirstOrDefault().TestsOrRisks,
+                            TestPrice = g.FirstOrDefault().LabsTestsAndRisks.FirstOrDefault().Price
+                        };
+            return Ok(tests);
+        }
+
+        [HttpGet("GetLabPatient")]
+        public async Task<ActionResult> GetLabPatient()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var ids = from ptr in _context.LabPatients
+                      where ptr.LabId == userId
+                      select ptr.PatientId;
+
+            var results = from lp in _context.LabPatients
+                          join t in _context.testsAndRisks on lp.TestId equals t.Id
+                          join l in _context.Patients on lp.PatientId equals l.Id
+                          where lp.LabId == user.Id
+                          select new
+                          {
+                              lp.Price,
+                              TestName = t.TestsOrRisks,
+                              PatientName = l.Name,
+                              PatientNumber = l.PhoneNumber
+                          };
+            return Ok(results);
         }
 
         [HttpPost("LabResults")]

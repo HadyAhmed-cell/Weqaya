@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Packaging.Signing;
 using System.Numerics;
 using System.Security.Claims;
 using System.Text;
@@ -71,9 +72,6 @@ namespace VirtualClinic.Controllers
             string email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
-            var patients = await _context.DoctorPatients.Where(p => p.doctorId == userId).ToListAsync();
-
-            var appointments = await _context.Appointments.Where(n => n.DoctorId == userId).ToListAsync();
 
             if ( user == null )
             {
@@ -82,14 +80,44 @@ namespace VirtualClinic.Controllers
             return Ok(user);
         }
 
+        [HttpGet("ViewDoctorAppointment")]
+        public async Task<ActionResult> GetDoctorAppointments()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var appointments = from ap in _context.Appointments
+                               where ap.DoctorId == userId
+                               select ap.AppointmentDateTime.ToString();
+
+            return Ok(appointments);
+        }
+
         [HttpGet("ViewDoctorPatients")]
         public async Task<ActionResult> ViewPatients()
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
+            var ids = from ptr in _context.DoctorPatients
+                      where ptr.doctorId == userId
+                      select ptr.patientId;
 
-            var patients = await _context.DoctorPatients.Where(n => n.doctorId == userId).ToListAsync();
+            var patients = from tr in _context.Patients
+                           from ty in _context.DoctorPatients
+                           where ids.Contains(tr.Id) && ty.doctorId == userId && ids.Contains(ty.patientId)
+                           group tr by tr.Id into g
+                           select new
+                           {
+                               PatientAssigned = g.FirstOrDefault().Name,
+                               Appointment = g.FirstOrDefault().doctorPatients.FirstOrDefault().AppointmentDate.ToString(),
+                               Gender = g.FirstOrDefault().Gender,
+                               Age = g.FirstOrDefault().Age,
+                               Weight = g.FirstOrDefault().Weight,
+                               Height = g.FirstOrDefault().Height,
+                               PhoneNumber = g.FirstOrDefault().PhoneNumber,
+                           };
 
             return Ok(patients);
         }
