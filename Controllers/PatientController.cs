@@ -371,8 +371,7 @@ namespace VirtualClinic.Controllers
                           {
                               lp.Price,
                               TestName = t.TestsOrRisks,
-                              LabName = l.Name,
-                              LabTroll = l.Name
+                              LabName = l.Name
                           };
             return Ok(results);
         }
