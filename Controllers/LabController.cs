@@ -32,21 +32,6 @@ namespace VirtualClinic.Controllers
             return Ok(labs);
         }
 
-        [Authorize(Roles = "Lab")]
-        [HttpGet("{id}")]
-        public async Task<ActionResult> GetLabById(int id)
-        {
-            Lab lab = _context.Labs
-                .Include(p => p.LabPatients).ThenInclude(p => p.Patient)
-                .FirstOrDefault(l => l.Id == id);
-            if ( lab == null )
-            {
-                return BadRequest();
-            }
-
-            return Ok(lab);
-        }
-
         [HttpPost("AddLab")]
         public async Task<ActionResult> AddLab(Lab lab)
         {
@@ -60,17 +45,37 @@ namespace VirtualClinic.Controllers
             return Ok("Lab Added Successfully !");
         }
 
+        [HttpPost("AddPhoto")]
+        public async Task<ActionResult> AddPhoto(IFormFile file)
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+            var lab = await _context.Labs.SingleOrDefaultAsync(x => x.Id == userId);
+            if ( file == null || file.Length == 0 )
+                return BadRequest("No file uploaded.");
+
+            var stream = new MemoryStream();
+
+            await file.CopyToAsync(stream);
+            lab.Photo = stream.ToArray();
+            await _context.SaveChangesAsync();
+            return Ok("Photo Upploaded Successfully");
+        }
+
         [HttpPut("EditLabData")]
         public async Task<ActionResult> UpdateLab(Lab lab)
         {
-            if ( ModelState.IsValid )
-            {
-                string email = User.FindFirstValue(ClaimTypes.Email);
-                lab.Email = email;
-                _context.Labs.Update(lab);
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+            lab.Email = email;
+            user.Id = userId;
+            user.Area = lab.Area;
+            user.StreetAddress = lab.StreetAddress;
+            user.LabDescript = lab.LabDescript;
 
-                await _context.SaveChangesAsync();
-            }
+            await _context.SaveChangesAsync();
 
             return Ok("Lab Data Updated Successfully !");
         }
@@ -156,6 +161,36 @@ namespace VirtualClinic.Controllers
             _context.LabPatients.RemoveRange(patientToDelete);
             await _context.SaveChangesAsync();
             return Ok("Patient Deleted Successfully !");
+        }
+
+        [HttpGet("SearchedLabs")]
+        public async Task<ActionResult> SearchLabs(string test = null, string area = null)
+        {
+            IQueryable<Lab> labs = _context.Labs;
+
+            if ( test != null )
+            {
+                labs = from l in _context.Labs
+                       join lt in _context.LabsTestsAndRisks on l.Id equals lt.LabId
+                       join t in _context.testsAndRisks on lt.TestsAndRisksId equals t.Id
+                       where t.TestsOrRisks.Contains(test)
+                       select l;
+            }
+
+            if ( area != null )
+            {
+                area = area.Trim();
+                labs = labs.Where(l => l.Area.Contains(area));
+            }
+
+            var result = await labs.ToListAsync();
+
+            if ( !result.Any() )
+            {
+                return NotFound();
+            }
+
+            return Ok(result);
         }
 
         [HttpPost("ChooseTests")]

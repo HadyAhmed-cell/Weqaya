@@ -59,8 +59,21 @@ namespace VirtualClinic.Controllers
         public async Task<ActionResult> EditData(Doctor doctor)
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
             doctor.Email = email;
-            _context.Doctors.Update(doctor);
+            user.Price = doctor.Price;
+            user.Duration = doctor.Duration;
+            user.Education = doctor.Education;
+            user.DoctorInfo = doctor.DoctorInfo;
+            user.SubSpeciatlity = doctor.SubSpeciatlity;
+            user.Speciality = doctor.Speciality;
+            user.Area = doctor.Area;
+            user.Name = doctor.Name;
+            user.TimeFrom = doctor.TimeFrom;
+            user.TimeTo = doctor.TimeTo;
+            user.StreetAddress = doctor.StreetAddress;
+
             await _context.SaveChangesAsync();
 
             return Ok("Data Updated Successfully !");
@@ -158,32 +171,33 @@ namespace VirtualClinic.Controllers
         [HttpGet("SearchedDoctors")]
         public async Task<ActionResult> SearchDoctors(string specialty = null, string area = null, string name = null)
         {
-            IEnumerable<Doctor> doctors = _context.Doctors;
+            IQueryable<Doctor> doctors = _context.Doctors;
 
             if ( specialty != null )
             {
                 specialty = specialty.Trim();
-                doctors = doctors.Where(d => d.Speciality.Equals(specialty, StringComparison.OrdinalIgnoreCase)).ToList();
+                doctors = doctors.Where(d => d.Speciality.Contains(specialty));
             }
 
             if ( name != null )
             {
                 name = name.Trim();
-                doctors = doctors.Where(d => d.Name.Equals(name, StringComparison.OrdinalIgnoreCase)).ToList();
+                doctors = doctors.Where(d => d.Name.Contains(name));
             }
 
             if ( area != null )
             {
                 area = area.Trim();
-                doctors = doctors.Where(d => d.Area.Equals(area, StringComparison.OrdinalIgnoreCase)).ToList();
+                doctors = doctors.Where(d => d.Area.Contains(area));
             }
 
             if ( !doctors.Any() )
             {
                 return NotFound();
             }
+            var result = await doctors.ToListAsync();
 
-            return Ok(doctors);
+            return Ok(result);
         }
 
         [HttpPost("Appointments")]
