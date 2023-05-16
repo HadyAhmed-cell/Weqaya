@@ -1,4 +1,5 @@
-﻿using Amazon;
+﻿using AForge.Imaging.Filters;
+using Amazon;
 using Amazon.Textract;
 using Amazon.Textract.Model;
 using Microsoft.AspNetCore.Authorization;
@@ -6,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Packaging.Signing;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Security.Claims;
 using VirtualClinic.Data;
 using VirtualClinic.Entities;
@@ -472,6 +475,24 @@ namespace VirtualClinic.Controllers
 
             using var memoryStream = new MemoryStream();
             await image.CopyToAsync(memoryStream);
+
+            var sourceImage = new Bitmap(memoryStream);
+
+            // Apply image enhancement techniques
+            var grayscaleFilter = new Grayscale(0.2125, 0.7154, 0.0721);
+            var gaussianFilter = new GaussianBlur(2, 7);
+            var contrastFilter = new ContrastStretch();
+            var sharpenFilter = new Sharpen();
+
+            var processedImage = grayscaleFilter.Apply(sourceImage);
+            processedImage = gaussianFilter.Apply(processedImage);
+            contrastFilter.ApplyInPlace(processedImage);
+            sharpenFilter.ApplyInPlace(processedImage);
+
+            // Save the processed image back to the memory stream
+            var processedMemoryStream = new MemoryStream();
+            processedImage.Save(processedMemoryStream, ImageFormat.Jpeg);
+            processedMemoryStream.Position = 0;
 
             var request = new DetectDocumentTextRequest
             {
