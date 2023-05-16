@@ -55,6 +55,22 @@ namespace VirtualClinic.Controllers
             return Ok("Photo Upploaded Successfully");
         }
 
+        [HttpGet("GetPhoto")]
+        public async Task<ActionResult> GetPhoto()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+            // Retrieve the photo data as byte array from your database or source
+            var photo = user.Photo;
+
+            // Convert the byte array to a base64 string
+            string base64String = Convert.ToBase64String(photo);
+
+            // Return the base64 string as the response
+            return Ok(new { photo = base64String });
+        }
+
         [HttpPost("EditDoctor")]
         public async Task<ActionResult> EditData(Doctor doctor)
         {
