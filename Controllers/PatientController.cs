@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Packaging.Signing;
 using System.Security.Claims;
 using VirtualClinic.Data;
 using VirtualClinic.Entities;
@@ -31,8 +32,7 @@ namespace VirtualClinic.Controllers
             return Ok(patients);
         }
 
-        [Authorize(Roles = "Admin")]
-        [HttpGet("{GetPatientById}")]
+        [HttpGet("GetPatientById")]
         public async Task<ActionResult> GetPatientById(int GetPatientById)
         {
             var patient = await _context.Patients
@@ -61,9 +61,10 @@ namespace VirtualClinic.Controllers
         [HttpPost("AddPatient")]
         public async Task<ActionResult> CreatePatient(Patient patient)
         {
-            await _context.Patients.AddAsync(patient);
             string email = User.FindFirstValue(ClaimTypes.Email);
             patient.Email = email;
+            await _context.Patients.AddAsync(patient);
+
             await _context.SaveChangesAsync();
 
             return Ok(patient);
@@ -76,7 +77,6 @@ namespace VirtualClinic.Controllers
             var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
             patient.Email = email;
-            user.Id = userId;
             user.Id = userId;
             user.Name = patient.Name;
             user.Weight = patient.Weight;
@@ -100,26 +100,31 @@ namespace VirtualClinic.Controllers
             var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
             var patient = await _context.Patients.FirstOrDefaultAsync(x => x.Id == userId);
-            return Ok(patient);
+            return Ok(user);
         }
 
-        [HttpPut("{PatientRecommendId}")]
-        public async Task<ActionResult> RecommendTests(int PatientRecommendId)
+        [HttpPut("Recommendation")]
+        public async Task<ActionResult> RecommendTests()
         {
-            Patient patient = await _context.Patients
-                .Include(p => p.PatientTestsAndRisks)
-                .SingleOrDefaultAsync(x => x.Id == PatientRecommendId);
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var patient = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = patient.Id;
 
-            var patientId = patient.Id;
+            var patientId = userId;
+            var patientTests = _context.PatientTestsAndRisks
+    .Where(x => x.PatientId == userId);
 
-            _context.PatientTestsAndRisks.RemoveRange(patient.PatientTestsAndRisks);
-            _context.SaveChanges();
-
-            if ( patient.Age >= 45 && (patient.Diabetes == true || patient.DiabetesRelatives == true) )
+            if ( patientTests != null )
             {
-                if ( !_context.PatientTestsAndRisks.Any(x => x.TestTestsAndRisksId == 1 && x.PatientId == PatientRecommendId) )
+                _context.PatientTestsAndRisks.RemoveRange(patientTests);
+                _context.SaveChanges();
+            }
+
+            if ( patient.Age >= 45 && (patient.Diabetes.Equals("True".Trim(), StringComparison.OrdinalIgnoreCase) || patient.DiabetesRelatives.Equals("True".Trim(), StringComparison.OrdinalIgnoreCase)) )
+            {
+                if ( !_context.PatientTestsAndRisks.Any(x => x.TestTestsAndRisksId == 1 && x.PatientId == userId) )
                 {
-                    if ( patient.Weight >= 90 || patient.HighPressure == true || patient.MedicineForDiabetesOrPressure == true )
+                    if ( patient.Weight >= 90 || patient.HighPressure.Equals("True".Trim(), StringComparison.OrdinalIgnoreCase) || patient.MedicineForDiabetesOrPressure.Equals("True".Trim(), StringComparison.OrdinalIgnoreCase) )
                     {
                         var riskid = 1;
                         var patientRisk = new PatientTestsOrRisks
@@ -135,9 +140,9 @@ namespace VirtualClinic.Controllers
             }
             if ( patient.Gender == "Male" && (patient.Age >= 45 && patient.Age <= 65) && patient.Weight >= 90 )
             {
-                if ( !_context.PatientTestsAndRisks.Any(x => x.TestTestsAndRisksId == 3 && x.PatientId == PatientRecommendId) )
+                if ( !_context.PatientTestsAndRisks.Any(x => x.TestTestsAndRisksId == 3 && x.PatientId == userId) )
                 {
-                    if ( patient.RelativesWithHeartAttacksOrHighColestrol == true || patient.Diabetes == true || patient.Smoking == true )
+                    if ( patient.RelativesWithHeartAttacksOrHighColestrol.Equals("True".Trim(), StringComparison.OrdinalIgnoreCase) || patient.Diabetes.Equals("True".Trim(), StringComparison.OrdinalIgnoreCase) || patient.Smoking.Equals("True".Trim(), StringComparison.OrdinalIgnoreCase) )
                     {
                         var riskid = 3;
                         var patientRisk = new PatientTestsOrRisks
@@ -154,9 +159,9 @@ namespace VirtualClinic.Controllers
 
             if ( patient.Gender == "Female" && (patient.Age >= 55 && patient.Age <= 65) && patient.Weight >= 90 )
             {
-                if ( !_context.PatientTestsAndRisks.Any(x => x.TestTestsAndRisksId == 3 && x.PatientId == PatientRecommendId) )
+                if ( !_context.PatientTestsAndRisks.Any(x => x.TestTestsAndRisksId == 3 && x.PatientId == userId) )
                 {
-                    if ( patient.RelativesWithHeartAttacksOrHighColestrol == true || patient.Diabetes == true || patient.Smoking == true )
+                    if ( patient.RelativesWithHeartAttacksOrHighColestrol.Equals("True".Trim(), StringComparison.OrdinalIgnoreCase) || patient.Diabetes.Equals("True".Trim(), StringComparison.OrdinalIgnoreCase) || patient.Smoking.Equals("True".Trim(), StringComparison.OrdinalIgnoreCase) )
                     {
                         var riskid = 3;
                         var patientRisk = new PatientTestsOrRisks
@@ -173,9 +178,9 @@ namespace VirtualClinic.Controllers
 
             if ( patient.Age >= 66 || patient.Weight >= 90 )
             {
-                if ( !_context.PatientTestsAndRisks.Any(x => x.TestTestsAndRisksId == 3 && x.PatientId == PatientRecommendId) )
+                if ( !_context.PatientTestsAndRisks.Any(x => x.TestTestsAndRisksId == 3 && x.PatientId == userId) )
                 {
-                    if ( patient.RelativesWithHeartAttacksOrHighColestrol == true || patient.Diabetes == true || patient.Smoking == true )
+                    if ( patient.RelativesWithHeartAttacksOrHighColestrol.Equals("True".Trim(), StringComparison.OrdinalIgnoreCase) || patient.Diabetes.Equals("True".Trim(), StringComparison.OrdinalIgnoreCase) || patient.Smoking.Equals("True".Trim(), StringComparison.OrdinalIgnoreCase) )
                     {
                         var riskid = 3;
                         var patientRisk = new PatientTestsOrRisks
@@ -190,9 +195,9 @@ namespace VirtualClinic.Controllers
                 }
             }
 
-            if ( patient.Diabetes == true )
+            if ( patient.Diabetes.Equals("True".Trim(), StringComparison.OrdinalIgnoreCase) )
             {
-                if ( !_context.PatientTestsAndRisks.Any(x => x.TestTestsAndRisksId == 6 && x.PatientId == PatientRecommendId) )
+                if ( !_context.PatientTestsAndRisks.Any(x => x.TestTestsAndRisksId == 6 && x.PatientId == userId) )
                 {
                     int[] testsarr = new int[] { 4, 5, 6, 7, 8 };
                     for ( int i = 0; i <= 4; i++ )
@@ -227,7 +232,7 @@ namespace VirtualClinic.Controllers
             }
             if ( patient.Weight >= 90 )
             {
-                if ( !_context.PatientTestsAndRisks.Any(x => x.TestTestsAndRisksId == 6 && x.PatientId == PatientRecommendId) )
+                if ( !_context.PatientTestsAndRisks.Any(x => x.TestTestsAndRisksId == 6 && x.PatientId == userId) )
                 {
                     int[] testsarr = new int[] { 6, 9, 10 };
                     for ( int i = 0; i <= 2; i++ )
@@ -295,6 +300,28 @@ namespace VirtualClinic.Controllers
             }
 
             return Ok("Doctor Assigned Successfully !");
+        }
+
+        [HttpGet("GetDoctorConfirmation")]
+        public async Task<ActionResult> ViewDoctorConfirmation(int docId)
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+            var confirmDoctor = from tr in _context.Doctors
+                                from ty in _context.DoctorPatients
+                                where tr.Id == docId && ty.patientId == userId && ty.doctorId == docId
+                                group tr by tr.Id into g
+                                select new
+                                {
+                                    DoctorAssigned = g.FirstOrDefault().Name,
+                                    Appointment = g.FirstOrDefault().doctorPatients.FirstOrDefault().AppointmentDate.ToString(),
+                                    Specialization = g.FirstOrDefault().Speciality,
+                                    Price = g.FirstOrDefault().Price,
+                                    Area = g.FirstOrDefault().Area,
+                                };
+
+            return Ok(confirmDoctor);
         }
 
         [HttpGet("ViewDoctorsAssigned")]
@@ -379,9 +406,9 @@ namespace VirtualClinic.Controllers
         [HttpPost]
         public async Task<ActionResult> OCR(IFormFile image)
         {
-            //string email = User.FindFirstValue(ClaimTypes.Email);
-            //var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
-            //var userId = user.Id;
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
             if ( image == null || image.Length == 0 )
             {
                 return BadRequest("Image file is required.");
@@ -563,6 +590,54 @@ namespace VirtualClinic.Controllers
                                  select ptr.AppointmentDateTime.ToString();
 
             return Ok(datesAvailable);
+        }
+
+        [HttpGet("SearchedLabsWithPatientTests")]
+        public async Task<ActionResult> SearchLabs()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            // Retrieve the tests for the patient
+            var patientTests = _context.PatientTestsAndRisks
+                .Where(pt => pt.PatientId == userId)
+                .Select(pt => pt.TestTestsAndRisksId)
+                .ToList();
+
+            // Retrieve the labs that have the same tests
+            var labsWithTotalPrice = _context.LabsTestsAndRisks
+                .Where(ltr => patientTests.Contains(ltr.TestsAndRisksId))
+                .GroupBy(ltr => ltr.Lab)
+                .Select(g => new
+                {
+                    LabName = g.Key.Name,
+                    TotalPrice = g.Sum(ltr => ltr.Price)
+                })
+                .ToList();
+
+            if ( !labsWithTotalPrice.Any() )
+            {
+                return NotFound();
+            }
+
+            return Ok(labsWithTotalPrice);
+        }
+
+        [HttpDelete("DeleteAssignedDoctor")]
+        public async Task<ActionResult> DeleteAssignedDoctor(int id)
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var doctorPatient = _context.DoctorPatients
+                .Where(x => x.patientId == userId && x.doctorId == id);
+
+            _context.DoctorPatients.RemoveRange(doctorPatient);
+            await _context.SaveChangesAsync();
+
+            return Ok("Doctor Deleted Successfully !");
         }
     }
 }

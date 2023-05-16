@@ -18,12 +18,12 @@ namespace VirtualClinic.Entities
 
         public string? PhoneNumber { get; set; }
 
-        public bool? DiabetesRelatives { get; set; }
-        public bool? RelativesWithHeartAttacksOrHighColestrol { get; set; }
-        public bool? Smoking { get; set; }
-        public bool? MedicineForDiabetesOrPressure { get; set; }
-        public bool? HighPressure { get; set; }
-        public bool? Diabetes { get; set; }
+        public string? DiabetesRelatives { get; set; }
+        public string? RelativesWithHeartAttacksOrHighColestrol { get; set; }
+        public string? Smoking { get; set; }
+        public string? MedicineForDiabetesOrPressure { get; set; }
+        public string? HighPressure { get; set; }
+        public string? Diabetes { get; set; }
 
         [ValidateNever]
         public IEnumerable<DoctorPatient>? doctorPatients { get; set; }

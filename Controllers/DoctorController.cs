@@ -80,6 +80,11 @@ namespace VirtualClinic.Controllers
             return Ok(user);
         }
 
+        //[HttpGet("GetDoctorPhoto")]
+        //public async Task<ActionResult> GetDoctorPhoto()
+        //{
+        //}
+
         [HttpGet("ViewDoctorAppointment")]
         public async Task<ActionResult> GetDoctorAppointments()
         {
