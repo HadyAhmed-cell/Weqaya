@@ -71,6 +71,7 @@ namespace VirtualClinic.Controllers
             var userId = user.Id;
             lab.Email = email;
             user.Id = userId;
+            user.Name = lab.Name;
             user.Area = lab.Area;
             user.StreetAddress = lab.StreetAddress;
             user.LabDescript = lab.LabDescript;

@@ -36,9 +36,9 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpGet("GetDoctorById")]
-        public async Task<ActionResult> GetDoctorById(int docId)
+        public async Task<ActionResult> GetDoctorById(int id)
         {
-            var doctor = await _context.Doctors.FindAsync(docId);
+            var doctor = await _context.Doctors.FindAsync(id);
 
             if ( doctor == null )
             {
@@ -46,7 +46,7 @@ namespace VirtualClinic.Controllers
             }
 
             var appointments = await _context.Appointments
-                .Where(a => a.DoctorId == docId)
+                .Where(a => a.DoctorId == id)
                 .Select(a => a.AppointmentDateTime.ToString())
                 .ToListAsync();
 
@@ -71,9 +71,9 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpGet("GetLabById")]
-        public async Task<ActionResult> GetLabById(int labId)
+        public async Task<ActionResult> GetLabById(int id)
         {
-            var lab = await _context.Labs.FindAsync(labId);
+            var lab = await _context.Labs.FindAsync(id);
 
             if ( lab == null )
             {
@@ -82,7 +82,7 @@ namespace VirtualClinic.Controllers
 
             var labTests = await (from lt in _context.LabsTestsAndRisks
                                   join t in _context.testsAndRisks on lt.TestsAndRisksId equals t.Id
-                                  where lt.LabId == labId
+                                  where lt.LabId == id
                                   select new
                                   {
                                       TestName = t.TestsOrRisks,
