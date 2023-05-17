@@ -86,9 +86,8 @@ namespace VirtualClinic.Controllers
             string email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
-            var labProfile = await _context.Labs.SingleOrDefaultAsync();
 
-            return Ok(labProfile);
+            return Ok(user);
         }
 
         [HttpGet("GetLabTests")]
