@@ -53,6 +53,7 @@ namespace VirtualClinic.Controllers
             var result = new
             {
                 Name = doctor.Name,
+                Id = doctor.Id,
                 DoctorInfo = doctor.DoctorInfo,
                 Price = doctor.Price,
                 Speciality = doctor.Speciality,
@@ -92,6 +93,7 @@ namespace VirtualClinic.Controllers
             var result = new
             {
                 Name = lab.Name,
+                Id = lab.Id,
                 Area = lab.Area,
                 Photo = lab.Photo,
                 LabDescript = lab.LabDescript,
