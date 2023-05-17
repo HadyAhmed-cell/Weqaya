@@ -53,7 +53,7 @@ namespace VirtualClinic.Controllers
             var result = new
             {
                 Name = doctor.Name,
-                Info = doctor.DoctorInfo,
+                DoctorInfo = doctor.DoctorInfo,
                 Price = doctor.Price,
                 Speciality = doctor.Speciality,
                 SubSpecialtity = doctor.SubSpeciatlity,
