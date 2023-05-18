@@ -104,21 +104,21 @@ namespace VirtualClinic.Controllers
             return Ok(result);
         }
 
-        [HttpGet("GetPatientTests")]
-        public async Task<ActionResult> GetPatientTests()
-        {
-            string email = User.FindFirstValue(ClaimTypes.Email);
-            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
-            var userId = user.Id;
-            var testsIds = from ptr in _context.PatientTestsAndRisks
-                           where ptr.PatientId == userId
-                           select ptr.TestTestsAndRisksId;
+        //[HttpGet("GetPatientTests")]
+        //public async Task<ActionResult> GetPatientTests()
+        //{
+        //    string email = User.FindFirstValue(ClaimTypes.Email);
+        //    var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+        //    var userId = user.Id;
+        //    var testsIds = from ptr in _context.PatientTestsAndRisks
+        //                   where ptr.PatientId == userId
+        //                   select ptr.TestTestsAndRisksId;
 
-            var tests = from tr in _context.testsAndRisks
-                        where testsIds.Contains(tr.Id)
-                        select tr.TestsOrRisks;
-            return Ok(tests);
-        }
+        //    var tests = from tr in _context.testsAndRisks
+        //                where testsIds.Contains(tr.Id)
+        //                select tr.TestsOrRisks;
+        //    return Ok(tests);
+        //}
 
         [HttpPost("AddPatient")]
         public async Task<ActionResult> CreatePatient(Patient patient)
