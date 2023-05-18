@@ -55,21 +55,21 @@ namespace VirtualClinic.Controllers
             return Ok("Photo Upploaded Successfully");
         }
 
-        [HttpGet("GetPhoto")]
-        public async Task<ActionResult> GetPhoto()
-        {
-            string email = User.FindFirstValue(ClaimTypes.Email);
-            var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
-            var userId = user.Id;
-            // Retrieve the photo data as byte array from your database or source
-            var photo = user.Photo;
+        //[HttpGet("GetPhoto")]
+        //public async Task<ActionResult> GetPhoto()
+        //{
+        //    string email = User.FindFirstValue(ClaimTypes.Email);
+        //    var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
+        //    var userId = user.Id;
+        //    // Retrieve the photo data as byte array from your database or source
+        //    var photo = user.Photo;
 
-            // Convert the byte array to a base64 string
-            string base64String = Convert.ToBase64String(photo);
+        //    // Convert the byte array to a base64 string
+        //    string base64String = Convert.ToBase64String(photo);
 
-            // Return the base64 string as the response
-            return Ok(new { photo = base64String });
-        }
+        //    // Return the base64 string as the response
+        //    return Ok(new { photo = base64String });
+        //}
 
         [HttpPost("EditDoctor")]
         public async Task<ActionResult> EditData(Doctor doctor)
@@ -108,11 +108,6 @@ namespace VirtualClinic.Controllers
             }
             return Ok(user);
         }
-
-        //[HttpGet("GetDoctorPhoto")]
-        //public async Task<ActionResult> GetDoctorPhoto()
-        //{
-        //}
 
         [HttpGet("ViewDoctorAppointment")]
         public async Task<ActionResult> GetDoctorAppointments()
@@ -211,7 +206,31 @@ namespace VirtualClinic.Controllers
             {
                 return NotFound();
             }
-            var result = await doctors.ToListAsync();
+            var result = await doctors
+                .Select(x => new
+                {
+                    x.Name,
+                    x.Id,
+                    x.DoctorInfo,
+                    x.Price,
+                    x.Speciality,
+                    x.SubSpeciatlity,
+                    x.Education,
+                    x.TimeTo,
+                    x.TimeFrom,
+                    x.Duration,
+                    x.Area,
+                    x.StreetAddress,
+                    x.Photo,
+                    //    Appointments = _context.Appointments
+                    //.Where(a => a.DoctorId == x.Id)
+                    //.Select(a => new
+                    //{
+                    //    Appointments = a.AppointmentDateTime.ToString()
+                    //})
+                    //.ToList()
+                })
+                .ToListAsync();
 
             return Ok(result);
         }
