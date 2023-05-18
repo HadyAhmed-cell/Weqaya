@@ -52,20 +52,21 @@ namespace VirtualClinic.Controllers
 
             var result = new
             {
-                Name = doctor.Name,
-                Id = doctor.Id,
-                DoctorInfo = doctor.DoctorInfo,
-                Price = doctor.Price,
-                Speciality = doctor.Speciality,
-                SubSpecialtity = doctor.SubSpeciatlity,
-                Education = doctor.Education,
-                TimeTo = doctor.TimeTo,
-                TimeFrom = doctor.TimeFrom,
-                Duration = doctor.Duration,
-                Area = doctor.Area,
-                Photo = doctor.Photo,
+                doctor.Name,
+                doctor.Id,
+                doctor.DoctorInfo,
+                doctor.Price,
+                doctor.Speciality,
+                doctor.SubSpeciatlity,
+                doctor.Education,
+                doctor.TimeTo,
+                doctor.TimeFrom,
+                doctor.Duration,
+                doctor.Area,
+                doctor.StreetAddress,
+                doctor.Photo,
 
-                Appointments = appointments
+                appointments
             };
 
             return Ok(result);
