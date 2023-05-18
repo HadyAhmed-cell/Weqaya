@@ -87,18 +87,18 @@ namespace VirtualClinic.Controllers
                                   where lt.LabId == id
                                   select new
                                   {
-                                      TestName = t.TestsOrRisks,
-                                      Price = lt.Price
+                                      t.TestsOrRisks,
+                                      lt.Price
                                   }).ToListAsync();
 
             var result = new
             {
-                Name = lab.Name,
-                Id = lab.Id,
-                Area = lab.Area,
-                Photo = lab.Photo,
-                LabDescript = lab.LabDescript,
-                LabTests = labTests
+                lab.Name,
+                lab.Id,
+                lab.Area,
+                lab.Photo,
+                lab.LabDescript,
+                labTests
             };
 
             return Ok(result);
