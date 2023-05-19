@@ -211,10 +211,8 @@ namespace VirtualClinic.Controllers
             };
             if ( LabTests == true )
             {
-                return BadRequest("Test Already Priced !");
-            }
-            else
-            {
+                var labTest = await _context.LabsTestsAndRisks.FirstOrDefaultAsync(x => x.LabId == userId && x.TestsAndRisksId == testId);
+                _context.LabsTestsAndRisks.Remove(labTest);
                 await _context.LabsTestsAndRisks.AddAsync(labsTestsAndRisks);
                 await _context.SaveChangesAsync();
             }
