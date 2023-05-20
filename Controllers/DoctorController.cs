@@ -139,13 +139,13 @@ namespace VirtualClinic.Controllers
                            group tr by tr.Id into g
                            select new
                            {
-                               PatientAssigned = g.FirstOrDefault().Name,
-                               Appointment = g.FirstOrDefault().doctorPatients.FirstOrDefault().AppointmentDate.ToString(),
-                               Gender = g.FirstOrDefault().Gender,
-                               Age = g.FirstOrDefault().Age,
-                               Weight = g.FirstOrDefault().Weight,
-                               Height = g.FirstOrDefault().Height,
-                               PhoneNumber = g.FirstOrDefault().PhoneNumber,
+                               g.FirstOrDefault().Name,
+                               PatientAppointment = g.FirstOrDefault().doctorPatients.FirstOrDefault().AppointmentDate.ToString(),
+                               g.FirstOrDefault().Gender,
+                               g.FirstOrDefault().Age,
+                               g.FirstOrDefault().Weight,
+                               g.FirstOrDefault().Height,
+                               g.FirstOrDefault().PhoneNumber,
                            };
 
             return Ok(patients);

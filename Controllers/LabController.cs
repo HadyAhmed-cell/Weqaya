@@ -128,9 +128,9 @@ namespace VirtualClinic.Controllers
                           select new
                           {
                               lp.Price,
-                              TestName = t.TestsOrRisks,
-                              PatientName = l.Name,
-                              PatientNumber = l.PhoneNumber
+                              t.TestsOrRisks,
+                              l.Name,
+                              l.PhoneNumber
                           };
             return Ok(results);
         }
