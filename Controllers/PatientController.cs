@@ -161,11 +161,10 @@ namespace VirtualClinic.Controllers
             string email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
-            var patient = await _context.Patients.FirstOrDefaultAsync(x => x.Id == userId);
             return Ok(user);
         }
 
-        [HttpPut("Recommendation")]
+        [HttpGet("Recommendation")]
         public async Task<ActionResult> RecommendTests()
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
@@ -331,7 +330,7 @@ namespace VirtualClinic.Controllers
 
             //_context.SaveChanges();
 
-            return Ok();
+            return Ok("Tests Recommended");
         }
 
         [HttpPost("AssignDoctor")]
