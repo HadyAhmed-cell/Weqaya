@@ -3,12 +3,14 @@ using Amazon;
 using Amazon.Textract;
 using Amazon.Textract.Model;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Packaging.Signing;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.Security.Claims;
 using VirtualClinic.Data;
 using VirtualClinic.Entities;
@@ -97,6 +99,7 @@ namespace VirtualClinic.Controllers
                 lab.Id,
                 lab.Area,
                 lab.Photo,
+                lab.StreetAddress,
                 lab.LabDescript,
                 //labTests
             };
@@ -334,18 +337,21 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPost("AssignDoctor")]
-        public async Task<ActionResult> AssignDoctor(int doctorId, [FromBody] string appointments)
+        public async Task<ActionResult> AssignDoctor(int doctorId, string appointments)
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
             var patient1 = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
             var doctor1 = await _context.Doctors.FirstOrDefaultAsync(x => x.Id == doctorId);
             var userId = patient1.Id;
             bool patientDoctor = await _context.DoctorPatients.AnyAsync(x => x.patientId == userId && x.doctorId == doctorId);
+
+            DateTime date = DateTime.ParseExact(appointments, "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
             DoctorPatient doctorPatient = new()
             {
                 doctorId = doctorId,
                 patientId = userId,
-                AppointmentDate = DateTime.Parse(appointments),
+                //AppointmentDate = DateTime.Parse(appointments),
+                AppointmentDate = date,
                 //doctor = doctor1,
                 //patient = patient1,
                 DoctorNotes = "No Notes For Now !"
