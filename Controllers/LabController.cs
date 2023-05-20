@@ -216,6 +216,11 @@ namespace VirtualClinic.Controllers
                 await _context.LabsTestsAndRisks.AddAsync(labsTestsAndRisks);
                 await _context.SaveChangesAsync();
             }
+            else
+            {
+                await _context.LabsTestsAndRisks.AddAsync(labsTestsAndRisks);
+                await _context.SaveChangesAsync();
+            }
 
             return Ok("Test Price Assigned Successfully !");
         }

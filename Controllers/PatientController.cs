@@ -98,7 +98,7 @@ namespace VirtualClinic.Controllers
                 lab.Area,
                 lab.Photo,
                 lab.LabDescript,
-                labTests
+                //labTests
             };
 
             return Ok(result);
@@ -464,6 +464,25 @@ namespace VirtualClinic.Controllers
             return Ok(results);
         }
 
+        [HttpGet("GetLabTests")]
+        public async Task<ActionResult> GetLabTests(int labId)
+        {
+            //string email = User.FindFirstValue(ClaimTypes.Email);
+            //var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = labId;
+
+            var tests = from tr in _context.testsAndRisks
+                        join ty in _context.LabsTestsAndRisks on tr.Id equals ty.TestsAndRisksId
+                        where ty.LabId == userId
+                        group tr by tr.Id into g
+                        select new
+                        {
+                            TestsAvailable = g.FirstOrDefault().TestsOrRisks,
+                            TestPrice = g.FirstOrDefault().LabsTestsAndRisks.FirstOrDefault().Price
+                        };
+            return Ok(tests);
+        }
+
         [HttpPost]
         public async Task<ActionResult> OCR(IFormFile image)
         {
@@ -740,6 +759,22 @@ namespace VirtualClinic.Controllers
             await _context.SaveChangesAsync();
 
             return Ok("Doctor Deleted Successfully !");
+        }
+
+        [HttpDelete("DeleteAssignedLab")]
+        public async Task<ActionResult> DeleteAssignedLab(int id)
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var labPatient = _context.LabPatients
+                .Where(x => x.PatientId == userId && x.LabId == id);
+
+            _context.LabPatients.RemoveRange(labPatient);
+            await _context.SaveChangesAsync();
+
+            return Ok("Lab Deleted Successfully !");
         }
     }
 }
