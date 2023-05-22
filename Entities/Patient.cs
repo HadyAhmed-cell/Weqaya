@@ -33,5 +33,11 @@ namespace VirtualClinic.Entities
 
         [ValidateNever]
         public IEnumerable<PatientTestsOrRisks> PatientTestsAndRisks { get; set; }
+
+        public IEnumerable<PatientTestsOrRisksOcr> PatientTestsOrRisksOcr { get; set; }
+
+        public IEnumerable<DoctorReviews> DoctorReviews { get; set; }
+
+        public IEnumerable<LabReviews> LabReviews { get; set; }
     }
 }

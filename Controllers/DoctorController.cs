@@ -1,12 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NuGet.Packaging.Signing;
-using System.Numerics;
+using System.Linq;
 using System.Security.Claims;
-using System.Text;
 using VirtualClinic.Data;
 using VirtualClinic.Entities;
 using VirtualClinic.Identity;
@@ -140,12 +136,15 @@ namespace VirtualClinic.Controllers
                            select new
                            {
                                g.FirstOrDefault().Name,
-                               PatientAppointment = g.FirstOrDefault().doctorPatients.FirstOrDefault().AppointmentDate.ToString(),
+                               g.FirstOrDefault().Id,
+                               PatientAppointment = g.SingleOrDefault().doctorPatients.Where(x => x.doctorId == userId).Select(p => p.AppointmentDate.ToString()).SingleOrDefault(),
                                g.FirstOrDefault().Gender,
                                g.FirstOrDefault().Age,
                                g.FirstOrDefault().Weight,
                                g.FirstOrDefault().Height,
                                g.FirstOrDefault().PhoneNumber,
+                               g.FirstOrDefault().doctorPatients.FirstOrDefault().StatusNum,
+                               DoctorNotes = g.FirstOrDefault().doctorPatients.FirstOrDefault().DoctorNotes.Replace("\n", "").Replace("\r", "")
                            };
 
             return Ok(patients);
@@ -160,6 +159,7 @@ namespace VirtualClinic.Controllers
 
             var patient = await _context.DoctorPatients.FirstOrDefaultAsync(x => x.patientId == patientId && x.doctorId == userId);
             patient.DoctorNotes = notes;
+            patient.StatusNum = 1;
             await _context.SaveChangesAsync();
             return Ok("Notes Added Successfully !");
         }
@@ -244,7 +244,7 @@ namespace VirtualClinic.Controllers
 
             Doctor doctor = await _context.Doctors.Include(a => a.Appointments).SingleOrDefaultAsync(x => x.Id == userId);
             _context.Appointments.RemoveRange(doctor.Appointments);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             foreach ( string appointment in appointments )
             {
@@ -258,6 +258,30 @@ namespace VirtualClinic.Controllers
             }
 
             return Ok("Appointments Dates Added !");
+        }
+
+        [HttpGet("ViewDoctorReviews")]
+        public async Task<ActionResult> ViewDoctorReviews()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var reviews = _context.DoctorReviews.Include(x => x.Patient).Where(p => p.DoctorId == userId)
+                .Select(o => new
+                {
+                    o.Patient.Name,
+                    o.ReviewsComments
+                });
+            var avgReviews = await _context.DoctorReviews.AverageAsync(p => p.Reviews);
+
+            var result = new
+            {
+                Avg = avgReviews,
+                Reviews = reviews
+            };
+
+            return Ok(result);
         }
     }
 }

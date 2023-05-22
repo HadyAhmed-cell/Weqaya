@@ -17,8 +17,11 @@ namespace VirtualClinic.Data
         public DbSet<LabPatient> LabPatients { get; set; }
         public DbSet<DoctorPatient> DoctorPatients { get; set; }
         public DbSet<PatientTestsOrRisks> PatientTestsAndRisks { get; set; }
+        public DbSet<PatientTestsOrRisksOcr> PatientTestsOrRisksOcrs { get; set; }
         public DbSet<LabsTestsAndRisks> LabsTestsAndRisks { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
+        public DbSet<DoctorReviews> DoctorReviews { get; set; }
+        public DbSet<LabReviews> LabReviews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -62,6 +65,18 @@ namespace VirtualClinic.Data
                 .WithMany(lp => lp.PatientTestsOrRisks)
                 .HasForeignKey(lp => lp.TestTestsAndRisksId);
             });
+            modelBuilder.Entity<PatientTestsOrRisksOcr>(e =>
+            {
+                e.HasKey(lp => new { lp.PatientId, lp.TestTestsAndRisksId });
+
+                e.HasOne(lp => lp.Patient)
+                .WithMany(lp => lp.PatientTestsOrRisksOcr)
+                .HasForeignKey(lp => lp.PatientId);
+
+                e.HasOne(lp => lp.TestsAndRisks)
+                .WithMany(lp => lp.PatientTestsOrRisksOcr)
+                .HasForeignKey(lp => lp.TestTestsAndRisksId);
+            });
             modelBuilder.Entity<LabsTestsAndRisks>(e =>
             {
                 e.HasKey(lp => new { lp.LabId, lp.TestsAndRisksId });
@@ -79,14 +94,32 @@ namespace VirtualClinic.Data
             .HasMany(d => d.Appointments)
             .WithOne(a => a.Doctor)
             .HasForeignKey(a => a.DoctorId);
-            modelBuilder.Entity<Doctor>()
-            .HasMany(d => d.Reviews)
-            .WithOne(a => a.Doctor)
-            .HasForeignKey(a => a.DoctorId);
-            modelBuilder.Entity<Lab>()
-            .HasMany(d => d.Reviews)
-            .WithOne(a => a.Lab)
-            .HasForeignKey(a => a.LabId);
+
+            modelBuilder.Entity<DoctorReviews>()
+                .HasKey(lp => new { lp.DoctorId, lp.PatientId });
+
+            modelBuilder.Entity<DoctorReviews>()
+                .HasOne(lp => lp.Doctor)
+                .WithMany(l => l.Reviews)
+                .HasForeignKey(lp => lp.DoctorId);
+
+            modelBuilder.Entity<DoctorReviews>()
+                 .HasOne(lp => lp.Patient)
+                 .WithMany(l => l.DoctorReviews)
+                 .HasForeignKey(lp => lp.PatientId);
+
+            modelBuilder.Entity<LabReviews>()
+    .HasKey(lp => new { lp.LabId, lp.PatientId });
+
+            modelBuilder.Entity<LabReviews>()
+                .HasOne(lp => lp.Lab)
+                .WithMany(l => l.Reviews)
+                .HasForeignKey(lp => lp.LabId);
+
+            modelBuilder.Entity<LabReviews>()
+                 .HasOne(lp => lp.Patient)
+                 .WithMany(l => l.LabReviews)
+                 .HasForeignKey(lp => lp.PatientId);
         }
     }
 }

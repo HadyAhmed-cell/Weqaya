@@ -2,12 +2,9 @@
 using Amazon;
 using Amazon.Textract;
 using Amazon.Textract.Model;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
-using NuGet.Packaging.Signing;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -25,7 +22,7 @@ namespace VirtualClinic.Controllers
         public PatientController(DataContext context)
         {
             _context = context;
-            _amazonTextract = new AmazonTextractClient("AKIAZLG4KFFZOPTXFC4I", "6b8yDSvsQQbV9iY7cWNiKkhnhIOBJC/Zgl0ubb+X", RegionEndpoint.USEast1);
+            _amazonTextract = new AmazonTextractClient("AKIAQ2Y4FMXURG5LCU2X", "PdWTfDqYOv87QyIZUoctIqYsxD6BcO0m2ohP/76w", RegionEndpoint.USEast1);
         }
 
         [HttpGet]
@@ -89,6 +86,7 @@ namespace VirtualClinic.Controllers
                                   where lt.LabId == id
                                   select new
                                   {
+                                      t.Id,
                                       t.TestsOrRisks,
                                       lt.Price
                                   }).ToListAsync();
@@ -196,6 +194,7 @@ namespace VirtualClinic.Controllers
                             PatientId = patientId,
                             TestTestsAndRisksId = riskid,
                         };
+
                         _context.PatientTestsAndRisks.Add(patientRisk);
                         _context.SaveChanges();
                         //_context.Entry(patient).State = EntityState.Detached;
@@ -350,6 +349,7 @@ namespace VirtualClinic.Controllers
             {
                 doctorId = doctorId,
                 patientId = userId,
+                StatusNum = 0,
                 //AppointmentDate = DateTime.Parse(appointments),
                 AppointmentDate = date,
                 //doctor = doctor1,
@@ -408,10 +408,22 @@ namespace VirtualClinic.Controllers
                           group tr by tr.Id into g
                           select new
                           {
-                              DoctorAssigned = g.FirstOrDefault().Name,
-                              Appointment = g.FirstOrDefault().doctorPatients.FirstOrDefault().AppointmentDate.ToString(),
-                              Specialization = g.FirstOrDefault().Speciality,
-                              SubSpeciality = g.FirstOrDefault().SubSpeciatlity
+                              g.FirstOrDefault().Name,
+                              Appointments = g.FirstOrDefault().doctorPatients.FirstOrDefault().AppointmentDate.ToString(),
+                              g.FirstOrDefault().Speciality,
+                              g.FirstOrDefault().Price,
+                              g.FirstOrDefault().Photo,
+                              g.FirstOrDefault().Area,
+                              g.FirstOrDefault().Id,
+                              g.FirstOrDefault().Duration,
+                              g.FirstOrDefault().DoctorInfo,
+                              g.FirstOrDefault().Education,
+                              g.FirstOrDefault().TimeFrom,
+                              g.FirstOrDefault().TimeTo,
+                              g.FirstOrDefault().SubSpeciatlity,
+                              g.FirstOrDefault().StreetAddress,
+                              Notes = g.FirstOrDefault().doctorPatients.FirstOrDefault().DoctorNotes,
+                              g.FirstOrDefault().doctorPatients.FirstOrDefault().StatusNum
                           };
 
             return Ok(doctors);
@@ -431,6 +443,7 @@ namespace VirtualClinic.Controllers
                 PatientId = userId,
                 TestId = testId,
                 Price = price,
+                StatusNum = 0,
                 Results = "No Results For Now !"
             };
             if ( patientLab == true )
@@ -465,7 +478,9 @@ namespace VirtualClinic.Controllers
                           {
                               lp.Price,
                               TestName = t.TestsOrRisks,
-                              LabName = l.Name
+                              LabName = l.Name,
+                              lp.StatusNum,
+                              lp.Results
                           };
             return Ok(results);
         }
@@ -483,6 +498,7 @@ namespace VirtualClinic.Controllers
                         group tr by tr.Id into g
                         select new
                         {
+                            g.FirstOrDefault().Id,
                             TestsAvailable = g.FirstOrDefault().TestsOrRisks,
                             TestPrice = g.FirstOrDefault().LabsTestsAndRisks.FirstOrDefault().Price
                         };
@@ -545,135 +561,135 @@ namespace VirtualClinic.Controllers
                 if ( extractedText.Contains("Diabetes", StringComparison.OrdinalIgnoreCase) )
                 {
                     var riskid = 1;
-                    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                    bool LabTests = await _context.PatientTestsOrRisksOcrs.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
                     if ( !LabTests )
                     {
-                        var patientRisk = new PatientTestsOrRisks
+                        var patientRisk = new PatientTestsOrRisksOcr
                         {
                             PatientId = userId,
                             TestTestsAndRisksId = riskid,
                         };
-                        _context.PatientTestsAndRisks.Add(patientRisk);
+                        _context.PatientTestsOrRisksOcrs.Add(patientRisk);
                         _context.SaveChanges();
                     }
                 }
                 if ( extractedText.Contains("Blood Sugar Fasting", StringComparison.OrdinalIgnoreCase) )
                 {
                     var riskid = 4;
-                    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                    bool LabTests = await _context.PatientTestsOrRisksOcrs.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
                     if ( !LabTests )
                     {
-                        var patientRisk = new PatientTestsOrRisks
+                        var patientRisk = new PatientTestsOrRisksOcr
                         {
                             PatientId = userId,
                             TestTestsAndRisksId = riskid,
                         };
-                        _context.PatientTestsAndRisks.Add(patientRisk);
+                        _context.PatientTestsOrRisksOcrs.Add(patientRisk);
                         _context.SaveChanges();
                     }
                 }
                 if ( extractedText.Contains("2 HPP Blood Glucose", StringComparison.OrdinalIgnoreCase) )
                 {
                     var riskid = 5;
-                    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                    bool LabTests = await _context.PatientTestsOrRisksOcrs.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
                     if ( !LabTests )
                     {
-                        var patientRisk = new PatientTestsOrRisks
+                        var patientRisk = new PatientTestsOrRisksOcr
                         {
                             PatientId = userId,
                             TestTestsAndRisksId = riskid,
                         };
-                        _context.PatientTestsAndRisks.Add(patientRisk);
+                        _context.PatientTestsOrRisksOcrs.Add(patientRisk);
                         _context.SaveChanges();
                     }
                 }
                 if ( extractedText.Contains("HbA1c", StringComparison.OrdinalIgnoreCase) )
                 {
                     var riskid = 6;
-                    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                    bool LabTests = await _context.PatientTestsOrRisksOcrs.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
                     if ( !LabTests )
                     {
-                        var patientRisk = new PatientTestsOrRisks
+                        var patientRisk = new PatientTestsOrRisksOcr
                         {
                             PatientId = userId,
                             TestTestsAndRisksId = riskid,
                         };
-                        _context.PatientTestsAndRisks.Add(patientRisk);
+                        _context.PatientTestsOrRisksOcrs.Add(patientRisk);
                         _context.SaveChanges();
                     }
                 }
                 if ( extractedText.Contains("GFR Renal", StringComparison.OrdinalIgnoreCase) )
                 {
                     var riskid = 7;
-                    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                    bool LabTests = await _context.PatientTestsOrRisksOcrs.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
                     if ( !LabTests )
                     {
-                        var patientRisk = new PatientTestsOrRisks
+                        var patientRisk = new PatientTestsOrRisksOcr
                         {
                             PatientId = userId,
                             TestTestsAndRisksId = riskid,
                         };
-                        _context.PatientTestsAndRisks.Add(patientRisk);
+                        _context.PatientTestsOrRisksOcrs.Add(patientRisk);
                         _context.SaveChanges();
                     }
                 }
                 if ( extractedText.Contains("Fundus Examination", StringComparison.OrdinalIgnoreCase) )
                 {
                     var riskid = 8;
-                    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                    bool LabTests = await _context.PatientTestsOrRisksOcrs.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
                     if ( !LabTests )
                     {
-                        var patientRisk = new PatientTestsOrRisks
+                        var patientRisk = new PatientTestsOrRisksOcr
                         {
                             PatientId = userId,
                             TestTestsAndRisksId = riskid,
                         };
-                        _context.PatientTestsAndRisks.Add(patientRisk);
+                        _context.PatientTestsOrRisksOcrs.Add(patientRisk);
                         _context.SaveChanges();
                     }
                 }
                 if ( extractedText.Contains("TSH Free T4", StringComparison.OrdinalIgnoreCase) )
                 {
                     var riskid = 9;
-                    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                    bool LabTests = await _context.PatientTestsOrRisksOcrs.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
                     if ( !LabTests )
                     {
-                        var patientRisk = new PatientTestsOrRisks
+                        var patientRisk = new PatientTestsOrRisksOcr
                         {
                             PatientId = userId,
                             TestTestsAndRisksId = riskid,
                         };
-                        _context.PatientTestsAndRisks.Add(patientRisk);
+                        _context.PatientTestsOrRisksOcrs.Add(patientRisk);
                         _context.SaveChanges();
                     }
                 }
                 if ( extractedText.Contains("CBC", StringComparison.OrdinalIgnoreCase) )
                 {
                     var riskid = 10;
-                    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                    bool LabTests = await _context.PatientTestsOrRisksOcrs.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
                     if ( !LabTests )
                     {
-                        var patientRisk = new PatientTestsOrRisks
+                        var patientRisk = new PatientTestsOrRisksOcr
                         {
                             PatientId = userId,
                             TestTestsAndRisksId = riskid,
                         };
-                        _context.PatientTestsAndRisks.Add(patientRisk);
+                        _context.PatientTestsOrRisksOcrs.Add(patientRisk);
                         _context.SaveChanges();
                     }
                 }
                 if ( extractedText.Contains("Cholestrol", StringComparison.OrdinalIgnoreCase) )
                 {
                     var riskid = 3;
-                    bool LabTests = await _context.PatientTestsAndRisks.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
+                    bool LabTests = await _context.PatientTestsOrRisksOcrs.AnyAsync(x => x.PatientId == userId && x.TestTestsAndRisksId == riskid);
                     if ( !LabTests )
                     {
-                        var patientRisk = new PatientTestsOrRisks
+                        var patientRisk = new PatientTestsOrRisksOcr
                         {
                             PatientId = userId,
                             TestTestsAndRisksId = riskid,
                         };
-                        _context.PatientTestsAndRisks.Add(patientRisk);
+                        _context.PatientTestsOrRisksOcrs.Add(patientRisk);
                         _context.SaveChanges();
                     }
                 }
@@ -698,6 +714,29 @@ namespace VirtualClinic.Controllers
                                  select p.TestTestsAndRisksId).ToListAsync();
 
             var tests = await (from l in _context.PatientTestsAndRisks
+                               join t in _context.testsAndRisks on l.TestTestsAndRisksId equals t.Id
+                               where l.PatientId == userId && testIds.Contains(l.TestTestsAndRisksId)
+                               select new
+                               {
+                                   TestName = t.TestsOrRisks,
+                                   // Add additional properties from the testsAndRisks table as needed
+                               }).ToListAsync();
+
+            return Ok(tests);
+        }
+
+        [HttpGet("ViewPatientTestsOcr")]
+        public async Task<ActionResult> ViewPatientTestsOcr()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var testIds = await (from p in _context.PatientTestsOrRisksOcrs
+                                 where p.PatientId == userId
+                                 select p.TestTestsAndRisksId).ToListAsync();
+
+            var tests = await (from l in _context.PatientTestsOrRisksOcrs
                                join t in _context.testsAndRisks on l.TestTestsAndRisksId equals t.Id
                                where l.PatientId == userId && testIds.Contains(l.TestTestsAndRisksId)
                                select new
@@ -781,6 +820,48 @@ namespace VirtualClinic.Controllers
             await _context.SaveChangesAsync();
 
             return Ok("Lab Deleted Successfully !");
+        }
+
+        [HttpPost("DoctorReviews")]
+        public async Task<ActionResult> PostDoctorReviews(int id, int reviews, string comments = "No Comments")
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var doctorReviews = new DoctorReviews
+            {
+                PatientId = userId,
+                DoctorId = id,
+                Reviews = reviews,
+                ReviewsComments = comments
+            };
+
+            await _context.DoctorReviews.AddAsync(doctorReviews);
+            await _context.SaveChangesAsync();
+
+            return Ok("Review Added");
+        }
+
+        [HttpPost("LabReviews")]
+        public async Task<ActionResult> PostLabReviews(int id, int reviews, string comments = "No Comments")
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var labReviews = new LabReviews
+            {
+                PatientId = userId,
+                LabId = id,
+                ReviewsComments = comments,
+                Reviews = reviews
+            };
+
+            await _context.LabReviews.AddAsync(labReviews);
+            await _context.SaveChangesAsync();
+
+            return Ok("Review Added");
         }
     }
 }

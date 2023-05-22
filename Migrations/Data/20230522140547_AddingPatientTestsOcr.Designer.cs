@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtualClinic.Data;
 
@@ -11,9 +12,11 @@ using VirtualClinic.Data;
 namespace VirtualClinic.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230522140547_AddingPatientTestsOcr")]
+    partial class AddingPatientTestsOcr
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -110,9 +113,6 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<string>("DoctorNotes")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("StatusNum")
-                        .HasColumnType("int");
-
                     b.HasKey("doctorId", "patientId");
 
                     b.HasIndex("patientId");
@@ -130,10 +130,6 @@ namespace VirtualClinic.Migrations.Data
 
                     b.Property<int>("Reviews")
                         .HasColumnType("int");
-
-                    b.Property<string>("ReviewsComments")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("DoctorId", "PatientId");
 
@@ -187,9 +183,6 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<string>("Results")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("StatusNum")
-                        .HasColumnType("int");
-
                     b.Property<int>("TestId")
                         .HasColumnType("int");
 
@@ -210,10 +203,6 @@ namespace VirtualClinic.Migrations.Data
 
                     b.Property<int>("Reviews")
                         .HasColumnType("int");
-
-                    b.Property<string>("ReviewsComments")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("LabId", "PatientId");
 

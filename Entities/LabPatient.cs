@@ -18,6 +18,7 @@ namespace VirtualClinic.Entities
         public string? Results { get; set; }
 
         public int TestId { get; set; }
+        public int StatusNum { get; set; }
         public int Price { get; set; }
     }
 }

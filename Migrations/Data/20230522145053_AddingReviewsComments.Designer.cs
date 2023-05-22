@@ -12,8 +12,8 @@ using VirtualClinic.Data;
 namespace VirtualClinic.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230513113551_AddingReviewsTable")]
-    partial class AddingReviewsTable
+    [Migration("20230522145053_AddingReviewsComments")]
+    partial class AddingReviewsComments
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -107,6 +107,9 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<int>("patientId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("AppointmentDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("DoctorNotes")
                         .HasColumnType("nvarchar(max)");
 
@@ -119,21 +122,22 @@ namespace VirtualClinic.Migrations.Data
 
             modelBuilder.Entity("VirtualClinic.Entities.DoctorReviews", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("DoctorId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("DoctorId")
+                    b.Property<int>("PatientId")
                         .HasColumnType("int");
 
                     b.Property<int>("Reviews")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<string>("ReviewsComments")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("DoctorId");
+                    b.HasKey("DoctorId", "PatientId");
+
+                    b.HasIndex("PatientId");
 
                     b.ToTable("DoctorReviews");
                 });
@@ -158,9 +162,6 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<byte[]>("Photo")
                         .HasColumnType("varbinary(max)");
 
@@ -180,8 +181,14 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<int>("PatientId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Price")
+                        .HasColumnType("int");
+
                     b.Property<string>("Results")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TestId")
+                        .HasColumnType("int");
 
                     b.HasKey("LabId", "PatientId");
 
@@ -192,21 +199,22 @@ namespace VirtualClinic.Migrations.Data
 
             modelBuilder.Entity("VirtualClinic.Entities.LabReviews", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("LabId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("LabId")
+                    b.Property<int>("PatientId")
                         .HasColumnType("int");
 
                     b.Property<int>("Reviews")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<string>("ReviewsComments")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("LabId");
+                    b.HasKey("LabId", "PatientId");
+
+                    b.HasIndex("PatientId");
 
                     b.ToTable("LabReviews");
                 });
@@ -240,11 +248,11 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<int?>("Age")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("Diabetes")
-                        .HasColumnType("bit");
+                    b.Property<string>("Diabetes")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("DiabetesRelatives")
-                        .HasColumnType("bit");
+                    b.Property<string>("DiabetesRelatives")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
@@ -255,11 +263,11 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<int?>("Height")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("HighPressure")
-                        .HasColumnType("bit");
+                    b.Property<string>("HighPressure")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("MedicineForDiabetesOrPressure")
-                        .HasColumnType("bit");
+                    b.Property<string>("MedicineForDiabetesOrPressure")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -267,11 +275,11 @@ namespace VirtualClinic.Migrations.Data
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("RelativesWithHeartAttacksOrHighColestrol")
-                        .HasColumnType("bit");
+                    b.Property<string>("RelativesWithHeartAttacksOrHighColestrol")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("Smoking")
-                        .HasColumnType("bit");
+                    b.Property<string>("Smoking")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("Weight")
                         .HasColumnType("int");
@@ -294,6 +302,21 @@ namespace VirtualClinic.Migrations.Data
                     b.HasIndex("TestTestsAndRisksId");
 
                     b.ToTable("PatientTestsAndRisks");
+                });
+
+            modelBuilder.Entity("VirtualClinic.Entities.PatientTestsOrRisksOcr", b =>
+                {
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TestTestsAndRisksId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PatientId", "TestTestsAndRisksId");
+
+                    b.HasIndex("TestTestsAndRisksId");
+
+                    b.ToTable("PatientTestsOrRisksOcrs");
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.TestsAndRisks", b =>
@@ -351,7 +374,15 @@ namespace VirtualClinic.Migrations.Data
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("VirtualClinic.Entities.Patient", "Patient")
+                        .WithMany("DoctorReviews")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.LabPatient", b =>
@@ -381,7 +412,15 @@ namespace VirtualClinic.Migrations.Data
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("VirtualClinic.Entities.Patient", "Patient")
+                        .WithMany("LabReviews")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Lab");
+
+                    b.Navigation("Patient");
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.LabsTestsAndRisks", b =>
@@ -422,6 +461,25 @@ namespace VirtualClinic.Migrations.Data
                     b.Navigation("TestsAndRisks");
                 });
 
+            modelBuilder.Entity("VirtualClinic.Entities.PatientTestsOrRisksOcr", b =>
+                {
+                    b.HasOne("VirtualClinic.Entities.Patient", "Patient")
+                        .WithMany("PatientTestsOrRisksOcr")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VirtualClinic.Entities.TestsAndRisks", "TestsAndRisks")
+                        .WithMany("PatientTestsOrRisksOcr")
+                        .HasForeignKey("TestTestsAndRisksId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
+
+                    b.Navigation("TestsAndRisks");
+                });
+
             modelBuilder.Entity("VirtualClinic.Entities.Doctor", b =>
                 {
                     b.Navigation("Appointments");
@@ -442,7 +500,13 @@ namespace VirtualClinic.Migrations.Data
 
             modelBuilder.Entity("VirtualClinic.Entities.Patient", b =>
                 {
+                    b.Navigation("DoctorReviews");
+
+                    b.Navigation("LabReviews");
+
                     b.Navigation("PatientTestsAndRisks");
+
+                    b.Navigation("PatientTestsOrRisksOcr");
 
                     b.Navigation("doctorPatients");
 
@@ -454,6 +518,8 @@ namespace VirtualClinic.Migrations.Data
                     b.Navigation("LabsTestsAndRisks");
 
                     b.Navigation("PatientTestsOrRisks");
+
+                    b.Navigation("PatientTestsOrRisksOcr");
                 });
 #pragma warning restore 612, 618
         }

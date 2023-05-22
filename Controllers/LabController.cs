@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Numerics;
 using System.Security.Claims;
 using VirtualClinic.Data;
-using VirtualClinic.Dto;
 using VirtualClinic.Entities;
 using VirtualClinic.Interfaces;
 
@@ -144,6 +141,7 @@ namespace VirtualClinic.Controllers
 
             var patient = await _context.LabPatients.FirstOrDefaultAsync(x => x.PatientId == patientId && x.LabId == userId);
             patient.Results = labResults;
+            patient.StatusNum = 1;
             await _context.SaveChangesAsync();
             return Ok("Results Added Successfully !");
         }
@@ -223,6 +221,30 @@ namespace VirtualClinic.Controllers
             }
 
             return Ok("Test Price Assigned Successfully !");
+        }
+
+        [HttpGet("ViewLabReviews")]
+        public async Task<ActionResult> ViewLabReviews()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var reviews = _context.LabReviews.Include(x => x.Patient).Where(p => p.LabId == userId)
+                .Select(o => new
+                {
+                    o.Patient.Name,
+                    o.ReviewsComments
+                });
+            var avgReviews = await _context.LabReviews.AverageAsync(p => p.Reviews);
+
+            var result = new
+            {
+                Avg = avgReviews,
+                Reviews = reviews
+            };
+
+            return Ok(result);
         }
     }
 }
