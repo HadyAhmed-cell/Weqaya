@@ -422,7 +422,7 @@ namespace VirtualClinic.Controllers
                               g.FirstOrDefault().TimeTo,
                               g.FirstOrDefault().SubSpeciatlity,
                               g.FirstOrDefault().StreetAddress,
-                              Notes = g.FirstOrDefault().doctorPatients.FirstOrDefault().DoctorNotes,
+                              DoctorNotes = g.FirstOrDefault().doctorPatients.FirstOrDefault().DoctorNotes.Replace("\n", "").Replace("\r", ""),
                               g.FirstOrDefault().doctorPatients.FirstOrDefault().StatusNum
                           };
 
