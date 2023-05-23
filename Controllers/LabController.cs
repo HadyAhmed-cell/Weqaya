@@ -125,6 +125,7 @@ namespace VirtualClinic.Controllers
                           select new
                           {
                               lp.Price,
+                              lp.LabId,
                               t.TestsOrRisks,
                               l.Name,
                               l.PhoneNumber,

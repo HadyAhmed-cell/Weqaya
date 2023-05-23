@@ -501,6 +501,7 @@ namespace VirtualClinic.Controllers
                           select new
                           {
                               lp.Price,
+                              lp.LabId,
                               TestName = t.TestsOrRisks,
                               lp.TestId,
                               LabName = l.Name,
