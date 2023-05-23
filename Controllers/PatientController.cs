@@ -504,6 +504,8 @@ namespace VirtualClinic.Controllers
                               lp.LabId,
                               TestName = t.TestsOrRisks,
                               lp.TestId,
+                              l.Area,
+                              l.Photo,
                               LabName = l.Name,
                               lp.StatusNum
                           };
