@@ -170,9 +170,14 @@ namespace VirtualClinic.Controllers
             var userId = user.Id;
 
             var patientToDelete = await _context.LabPatients
-                    .SingleOrDefaultAsync(x => x.LabId == userId && x.PatientId == patientId);
-            patientToDelete.StatusNum = 1;
-            await _context.SaveChangesAsync();
+                    .Where(x => x.LabId == userId && x.PatientId == patientId).ToListAsync();
+
+            foreach ( var item in patientToDelete )
+            {
+                item.StatusNum = 1;
+                await _context.SaveChangesAsync();
+            }
+
             return Ok("Patient Completed Tests !");
         }
 
@@ -184,9 +189,13 @@ namespace VirtualClinic.Controllers
             var userId = user.Id;
 
             var patientToDelete = await _context.LabPatients
-                    .SingleOrDefaultAsync(x => x.LabId == userId && x.PatientId == id);
-            patientToDelete.StatusNum = 2;
-            await _context.SaveChangesAsync();
+                    .Where(x => x.LabId == userId && x.PatientId == id).ToListAsync();
+            foreach ( var item in patientToDelete )
+            {
+                item.StatusNum = 2;
+                await _context.SaveChangesAsync();
+            }
+
             return Ok("Patient Cancelled Successfully !");
         }
 

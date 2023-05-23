@@ -877,11 +877,13 @@ namespace VirtualClinic.Controllers
             var userId = user.Id;
 
             var labPatientDelete = await _context.LabPatients
-   .SingleOrDefaultAsync(x => x.PatientId == userId && x.LabId == id);
+   .Where(x => x.PatientId == userId && x.LabId == id).ToListAsync();
 
-            labPatientDelete.StatusNum = 1;
-
-            await _context.SaveChangesAsync();
+            foreach ( var item in labPatientDelete )
+            {
+                item.StatusNum = 2;
+                await _context.SaveChangesAsync();
+            }
 
             return Ok("Lab Deleted Successfully !");
         }
