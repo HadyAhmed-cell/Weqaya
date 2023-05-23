@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtualClinic.Data;
 
@@ -11,9 +12,11 @@ using VirtualClinic.Data;
 namespace VirtualClinic.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230522221622_Edit")]
+    partial class Edit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -96,34 +99,6 @@ namespace VirtualClinic.Migrations.Data
                     b.ToTable("Doctors");
                 });
 
-            modelBuilder.Entity("VirtualClinic.Entities.DoctorHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("AppointmentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DoctorNotes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("StatusNum")
-                        .HasColumnType("int");
-
-                    b.Property<int>("doctorId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("patientId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DoctorHistories");
-                });
-
             modelBuilder.Entity("VirtualClinic.Entities.DoctorPatient", b =>
                 {
                     b.Property<int>("doctorId")
@@ -199,37 +174,6 @@ namespace VirtualClinic.Migrations.Data
                     b.HasKey("Id");
 
                     b.ToTable("Labs");
-                });
-
-            modelBuilder.Entity("VirtualClinic.Entities.LabHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Price")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Results")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("StatusNum")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TestId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("labId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("patientId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("LabHistories");
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.LabPatient", b =>

@@ -22,6 +22,8 @@ namespace VirtualClinic.Data
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<DoctorReviews> DoctorReviews { get; set; }
         public DbSet<LabReviews> LabReviews { get; set; }
+        public DbSet<DoctorHistory> DoctorHistories { get; set; }
+        public DbSet<LabHistory> LabHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

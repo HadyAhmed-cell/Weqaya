@@ -121,30 +121,69 @@ namespace VirtualClinic.Controllers
             var results = from lp in _context.LabPatients
                           join t in _context.testsAndRisks on lp.TestId equals t.Id
                           join l in _context.Patients on lp.PatientId equals l.Id
-                          where lp.LabId == user.Id
+                          where lp.LabId == user.Id && lp.StatusNum == 0
                           select new
                           {
                               lp.Price,
                               t.TestsOrRisks,
                               l.Name,
-                              l.PhoneNumber
+                              l.PhoneNumber,
+                              lp.StatusNum
                           };
             return Ok(results);
         }
 
-        [HttpPost("LabResults")]
-        public async Task<ActionResult> PostLabResults(int patientId, string labResults)
-        {
-            string email = User.FindFirstValue(ClaimTypes.Email);
-            var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
-            var userId = user.Id;
+        //[HttpGet("GetLabPatientHistory")]
+        //public async Task<ActionResult> GetLabPatientHistory()
+        //{
+        //    string email = User.FindFirstValue(ClaimTypes.Email);
+        //    var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
+        //    var userId = user.Id;
 
-            var patient = await _context.LabPatients.FirstOrDefaultAsync(x => x.PatientId == patientId && x.LabId == userId);
-            patient.Results = labResults;
-            patient.StatusNum = 1;
-            await _context.SaveChangesAsync();
-            return Ok("Results Added Successfully !");
-        }
+        //    var ids = from ptr in _context.LabHistories
+        //              where ptr.labId == userId
+        //              select ptr.patientId;
+
+        //    var results = from lp in _context.LabHistories
+        //                  join t in _context.testsAndRisks on lp.TestId equals t.Id
+        //                  join l in _context.Patients on lp.patientId equals l.Id
+        //                  where lp.labId == user.Id
+        //                  select new
+        //                  {
+        //                      lp.Price,
+        //                      t.TestsOrRisks,
+        //                      lp.TestId,
+        //                      l.Name,
+        //                      l.PhoneNumber,
+        //                      lp.StatusNum,
+        //                      lp.Results
+        //                  };
+        //    return Ok(results);
+        //}
+
+        //[HttpPost("LabResults")]
+        //public async Task<ActionResult> PostLabResults(int patientId, string labResults)
+        //{
+        //    string email = User.FindFirstValue(ClaimTypes.Email);
+        //    var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
+        //    var userId = user.Id;
+
+        //    var patientToDelete = await _context.LabPatients
+        //            .SingleOrDefaultAsync(x => x.LabId == userId && x.PatientId == patientId && x.TestId == testId);
+        //    var labHistory = new LabHistory
+        //    {
+        //        labId = userId,
+        //        patientId = patientId,
+        //        StatusNum = 1,
+        //        TestId = patientToDelete.TestId,
+        //        Results = labResults,
+        //        Price = patientToDelete.Price,
+        //    };
+        //    _context.LabPatients.Remove(patientToDelete);
+        //    await _context.LabHistories.AddAsync(labHistory);
+        //    await _context.SaveChangesAsync();
+        //    return Ok("Results Added Successfully !");
+        //}
 
         [HttpDelete]
         public async Task<ActionResult> DeletePatientFromLabDb(int id)
@@ -153,12 +192,11 @@ namespace VirtualClinic.Controllers
             var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
 
-            var patientToDelete = _context.LabPatients
-                .Where(x => x.LabId == userId && x.PatientId == id);
-
-            _context.LabPatients.RemoveRange(patientToDelete);
+            var patientToDelete = await _context.LabPatients
+                    .SingleOrDefaultAsync(x => x.LabId == userId && x.PatientId == id);
+            patientToDelete.StatusNum = 1;
             await _context.SaveChangesAsync();
-            return Ok("Patient Deleted Successfully !");
+            return Ok("Patient Cancelled Successfully !");
         }
 
         [HttpGet("SearchedLabs")]

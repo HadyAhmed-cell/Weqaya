@@ -130,24 +130,53 @@ namespace VirtualClinic.Controllers
                       select ptr.patientId;
 
             var patients = from tr in _context.Patients
-                           from ty in _context.DoctorPatients
-                           where ids.Contains(tr.Id) && ty.doctorId == userId && ids.Contains(ty.patientId)
-                           group tr by tr.Id into g
+                           join ty in _context.DoctorPatients on tr.Id equals ty.patientId
+                           where ty.doctorId == userId && ty.patientId == tr.Id
                            select new
                            {
-                               g.FirstOrDefault().Name,
-                               g.FirstOrDefault().Id,
-                               PatientAppointment = g.SingleOrDefault().doctorPatients.Where(x => x.doctorId == userId).Select(p => p.AppointmentDate.ToString()).SingleOrDefault(),
-                               g.FirstOrDefault().Gender,
-                               g.FirstOrDefault().Age,
-                               g.FirstOrDefault().Weight,
-                               g.FirstOrDefault().Height,
-                               g.FirstOrDefault().PhoneNumber,
-                               g.FirstOrDefault().doctorPatients.FirstOrDefault().StatusNum,
-                               DoctorNotes = g.FirstOrDefault().doctorPatients.FirstOrDefault().DoctorNotes.Replace("\n", "").Replace("\r", "")
+                               tr.Name,
+                               tr.Id,
+                               PatientAppointment = ty.AppointmentDate.ToString(),
+                               tr.Gender,
+                               tr.Age,
+                               tr.Weight,
+                               tr.Height,
+                               tr.PhoneNumber,
+                               ty.StatusNum,
+                               DoctorNotes = ty.DoctorNotes.Replace("\n", "").Replace("\r", "")
                            };
 
-            return Ok(patients);
+            return Ok(patients.ToList());
+        }
+
+        [HttpGet("ViewDoctorPatientsHistory")]
+        public async Task<ActionResult> ViewPatientsHistory()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+            var ids = from ptr in _context.DoctorHistories
+                      where ptr.doctorId == userId
+                      select ptr.patientId;
+
+            var patients = from tr in _context.Patients
+                           join ty in _context.DoctorHistories on tr.Id equals ty.patientId
+                           where ty.doctorId == userId && ty.patientId == tr.Id
+                           select new
+                           {
+                               tr.Name,
+                               tr.Id,
+                               PatientAppointment = ty.AppointmentDate.ToString(),
+                               tr.Gender,
+                               tr.Age,
+                               tr.Weight,
+                               tr.Height,
+                               tr.PhoneNumber,
+                               ty.StatusNum,
+                               DoctorNotes = ty.DoctorNotes.Replace("\n", "").Replace("\r", "")
+                           };
+
+            return Ok(patients.ToList());
         }
 
         [HttpPost("DoctorNotes")]
@@ -157,9 +186,19 @@ namespace VirtualClinic.Controllers
             var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
 
-            var patient = await _context.DoctorPatients.FirstOrDefaultAsync(x => x.patientId == patientId && x.doctorId == userId);
-            patient.DoctorNotes = notes;
-            patient.StatusNum = 1;
+            var doctorPatient = await _context.DoctorPatients
+               .SingleOrDefaultAsync(x => x.patientId == patientId && x.doctorId == userId);
+
+            var doctorHistory = new DoctorHistory
+            {
+                patientId = patientId,
+                doctorId = userId,
+                StatusNum = 1,
+                DoctorNotes = notes,
+                AppointmentDate = doctorPatient.AppointmentDate
+            };
+            _context.DoctorPatients.Remove(doctorPatient);
+            await _context.DoctorHistories.AddAsync(doctorHistory);
             await _context.SaveChangesAsync();
             return Ok("Notes Added Successfully !");
         }
@@ -171,12 +210,21 @@ namespace VirtualClinic.Controllers
             var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
 
-            var patientToDelete = _context.DoctorPatients
-                .Where(x => x.doctorId == userId && x.patientId == id);
+            var doctorPatient = await _context.DoctorPatients
+               .SingleOrDefaultAsync(x => x.doctorId == userId && x.patientId == id);
 
-            _context.DoctorPatients.RemoveRange(patientToDelete);
+            var doctorHistory = new DoctorHistory
+            {
+                doctorId = userId,
+                patientId = id,
+                StatusNum = 2,
+                AppointmentDate = doctorPatient.AppointmentDate,
+                DoctorNotes = "No Notes Yet!"
+            };
+            _context.DoctorPatients.Remove(doctorPatient);
+            await _context.DoctorHistories.AddAsync(doctorHistory);
             await _context.SaveChangesAsync();
-            return Ok("Patient Deleted Successfully !");
+            return Ok("Patient Cancelled Successfully !");
         }
 
         [HttpGet("SearchedDoctors")]

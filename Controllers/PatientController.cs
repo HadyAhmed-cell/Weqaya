@@ -344,7 +344,7 @@ namespace VirtualClinic.Controllers
             var userId = patient1.Id;
             bool patientDoctor = await _context.DoctorPatients.AnyAsync(x => x.patientId == userId && x.doctorId == doctorId);
 
-            DateTime date = DateTime.ParseExact(appointments, "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+            DateTime date = DateTime.Parse(appointments);
             DoctorPatient doctorPatient = new()
             {
                 doctorId = doctorId,
@@ -356,15 +356,9 @@ namespace VirtualClinic.Controllers
                 //patient = patient1,
                 DoctorNotes = "No Notes For Now !"
             };
-            if ( patientDoctor == true )
-            {
-                return BadRequest("Doctor Already Assigned !");
-            }
-            else
-            {
-                await _context.DoctorPatients.AddAsync(doctorPatient);
-                await _context.SaveChangesAsync();
-            }
+
+            await _context.DoctorPatients.AddAsync(doctorPatient);
+            await _context.SaveChangesAsync();
 
             return Ok("Doctor Assigned Successfully !");
         }
@@ -403,30 +397,66 @@ namespace VirtualClinic.Controllers
                       select ptr.doctorId;
 
             var doctors = from tr in _context.Doctors
-                          from ty in _context.DoctorPatients
+                          join ty in _context.DoctorPatients on tr.Id equals ty.doctorId
                           where ids.Contains(tr.Id) && ty.patientId == userId && ids.Contains(ty.doctorId)
-                          group tr by tr.Id into g
                           select new
                           {
-                              g.FirstOrDefault().Name,
-                              Appointments = g.FirstOrDefault().doctorPatients.FirstOrDefault().AppointmentDate.ToString(),
-                              g.FirstOrDefault().Speciality,
-                              g.FirstOrDefault().Price,
-                              g.FirstOrDefault().Photo,
-                              g.FirstOrDefault().Area,
-                              g.FirstOrDefault().Id,
-                              g.FirstOrDefault().Duration,
-                              g.FirstOrDefault().DoctorInfo,
-                              g.FirstOrDefault().Education,
-                              g.FirstOrDefault().TimeFrom,
-                              g.FirstOrDefault().TimeTo,
-                              g.FirstOrDefault().SubSpeciatlity,
-                              g.FirstOrDefault().StreetAddress,
-                              DoctorNotes = g.FirstOrDefault().doctorPatients.FirstOrDefault().DoctorNotes.Replace("\n", "").Replace("\r", ""),
-                              g.FirstOrDefault().doctorPatients.FirstOrDefault().StatusNum
+                              tr.Name,
+                              Appointments = ty.AppointmentDate.ToString(),
+                              tr.Speciality,
+                              tr.Price,
+                              tr.Photo,
+                              tr.Area,
+                              tr.Id,
+                              tr.Duration,
+                              tr.DoctorInfo,
+                              tr.Education,
+                              tr.TimeFrom,
+                              tr.TimeTo,
+                              tr.SubSpeciatlity,
+                              tr.StreetAddress,
+                              DoctorNotes = ty.DoctorNotes.Replace("\n", "").Replace("\r", ""),
+                              ty.StatusNum
                           };
 
-            return Ok(doctors);
+            return Ok(doctors.ToList());
+        }
+
+        [HttpGet("ViewDoctorsHistory")]
+        public async Task<ActionResult> ViewDoctorsHistory()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var ids = from ptr in _context.DoctorHistories
+                      where ptr.patientId == userId
+                      select ptr.doctorId;
+
+            var doctors = from tr in _context.Doctors
+                          join ty in _context.DoctorHistories on tr.Id equals ty.doctorId
+                          where ids.Contains(tr.Id) && ty.patientId == userId && ids.Contains(ty.doctorId)
+                          select new
+                          {
+                              tr.Name,
+                              Appointments = ty.AppointmentDate.ToString(),
+                              tr.Speciality,
+                              tr.Price,
+                              tr.Photo,
+                              tr.Area,
+                              tr.Id,
+                              tr.Duration,
+                              tr.DoctorInfo,
+                              tr.Education,
+                              tr.TimeFrom,
+                              tr.TimeTo,
+                              tr.SubSpeciatlity,
+                              tr.StreetAddress,
+                              DoctorNotes = ty.DoctorNotes.Replace("\n", "").Replace("\r", ""),
+                              ty.StatusNum
+                          };
+
+            return Ok(doctors.ToList());
         }
 
         [HttpPost("AssignLab")]
@@ -446,15 +476,9 @@ namespace VirtualClinic.Controllers
                 StatusNum = 0,
                 Results = "No Results For Now !"
             };
-            if ( patientLab == true )
-            {
-                return BadRequest("Lab Already Assigned !");
-            }
-            else
-            {
-                await _context.LabPatients.AddAsync(labPatient);
-                await _context.SaveChangesAsync();
-            }
+
+            await _context.LabPatients.AddAsync(labPatient);
+            await _context.SaveChangesAsync();
 
             return Ok("Lab Assigned Successfully !");
         }
@@ -478,12 +502,39 @@ namespace VirtualClinic.Controllers
                           {
                               lp.Price,
                               TestName = t.TestsOrRisks,
+                              lp.TestId,
                               LabName = l.Name,
-                              lp.StatusNum,
-                              lp.Results
+                              lp.StatusNum
                           };
             return Ok(results);
         }
+
+        //[HttpGet("ViewLabsHistory")]
+        //public async Task<ActionResult> ViewLabsHistory()
+        //{
+        //    string email = User.FindFirstValue(ClaimTypes.Email);
+        //    var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+        //    var userId = user.Id;
+
+        //    var ids = from ptr in _context.LabHistories
+        //              where ptr.patientId == userId
+        //              select ptr.labId;
+
+        //    var results = from lp in _context.LabHistories
+        //                  join t in _context.testsAndRisks on lp.TestId equals t.Id
+        //                  join l in _context.Labs on lp.labId equals l.Id
+        //                  where lp.patientId == user.Id
+        //                  select new
+        //                  {
+        //                      lp.Price,
+        //                      TestName = t.TestsOrRisks,
+        //                      LabName = l.Name,
+        //                      lp.StatusNum,
+        //                      lp.Results,
+        //                      lp.TestId
+        //                  };
+        //    return Ok(results);
+        //}
 
         [HttpGet("GetLabTests")]
         public async Task<ActionResult> GetLabTests(int labId)
@@ -797,13 +848,22 @@ namespace VirtualClinic.Controllers
             var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
 
-            var doctorPatient = _context.DoctorPatients
-                .Where(x => x.patientId == userId && x.doctorId == id);
+            var doctorPatient = await _context.DoctorPatients
+                .SingleOrDefaultAsync(x => x.patientId == userId && x.doctorId == id);
 
-            _context.DoctorPatients.RemoveRange(doctorPatient);
+            var doctorHistory = new DoctorHistory
+            {
+                patientId = userId,
+                doctorId = doctorPatient.doctorId,
+                StatusNum = 2,
+                DoctorNotes = "No Notes Yet!",
+                AppointmentDate = doctorPatient.AppointmentDate
+            };
+            _context.DoctorPatients.Remove(doctorPatient);
+            await _context.DoctorHistories.AddAsync(doctorHistory);
             await _context.SaveChangesAsync();
 
-            return Ok("Doctor Deleted Successfully !");
+            return Ok("Doctor Cancelled Successfully !");
         }
 
         [HttpDelete("DeleteAssignedLab")]
@@ -813,10 +873,11 @@ namespace VirtualClinic.Controllers
             var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
 
-            var labPatient = _context.LabPatients
-                .Where(x => x.PatientId == userId && x.LabId == id);
+            var labPatientDelete = await _context.LabPatients
+   .SingleOrDefaultAsync(x => x.PatientId == userId && x.LabId == id);
 
-            _context.LabPatients.RemoveRange(labPatient);
+            labPatientDelete.StatusNum = 1;
+
             await _context.SaveChangesAsync();
 
             return Ok("Lab Deleted Successfully !");
