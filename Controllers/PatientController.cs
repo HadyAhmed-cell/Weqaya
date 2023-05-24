@@ -22,7 +22,7 @@ namespace VirtualClinic.Controllers
         public PatientController(DataContext context)
         {
             _context = context;
-            _amazonTextract = new AmazonTextractClient("AKIAQ2Y4FMXURG5LCU2X", "PdWTfDqYOv87QyIZUoctIqYsxD6BcO0m2ohP/76w", RegionEndpoint.USEast1);
+            _amazonTextract = new AmazonTextractClient(RegionEndpoint.USEast1);
         }
 
         [HttpGet]
