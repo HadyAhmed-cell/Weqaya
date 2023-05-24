@@ -121,62 +121,72 @@ namespace VirtualClinic.Controllers
             var results = from lp in _context.LabPatients
                           join t in _context.testsAndRisks on lp.TestId equals t.Id
                           join l in _context.Patients on lp.PatientId equals l.Id
-                          where lp.LabId == user.Id && lp.StatusNum == 0
+                          where lp.LabId == user.Id
                           select new
                           {
                               lp.Price,
                               lp.LabId,
                               t.TestsOrRisks,
                               l.Name,
+                              lp.PatientId,
                               l.PhoneNumber,
-                              lp.StatusNum
+                              lp.StatusNum,
+                              Results = lp.Results.Replace("\n", "").Replace("\r", "")
                           };
             return Ok(results);
         }
 
-        //[HttpGet("GetLabPatientHistory")]
-        //public async Task<ActionResult> GetLabPatientHistory()
-        //{
-        //    string email = User.FindFirstValue(ClaimTypes.Email);
-        //    var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
-        //    var userId = user.Id;
-
-        //    var ids = from ptr in _context.LabHistories
-        //              where ptr.labId == userId
-        //              select ptr.patientId;
-
-        //    var results = from lp in _context.LabHistories
-        //                  join t in _context.testsAndRisks on lp.TestId equals t.Id
-        //                  join l in _context.Patients on lp.patientId equals l.Id
-        //                  where lp.labId == user.Id
-        //                  select new
-        //                  {
-        //                      lp.Price,
-        //                      t.TestsOrRisks,
-        //                      lp.TestId,
-        //                      l.Name,
-        //                      l.PhoneNumber,
-        //                      lp.StatusNum,
-        //                      lp.Results
-        //                  };
-        //    return Ok(results);
-        //}
-
-        [HttpPost("LabResults")]
-        public async Task<ActionResult> PostLabResults(int patientId)
+        [HttpGet("GetLabPatientHistory")]
+        public async Task<ActionResult> GetLabPatientHistory()
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
 
-            var patientToDelete = await _context.LabPatients
-                    .Where(x => x.LabId == userId && x.PatientId == patientId).ToListAsync();
+            var ids = from ptr in _context.LabHistories
+                      where ptr.labId == userId
+                      select ptr.patientId;
 
-            foreach ( var item in patientToDelete )
+            var results = from lp in _context.LabHistories
+                          join t in _context.testsAndRisks on lp.TestId equals t.Id
+                          join l in _context.Patients on lp.patientId equals l.Id
+                          where lp.labId == user.Id
+                          select new
+                          {
+                              lp.Price,
+                              t.TestsOrRisks,
+                              lp.TestId,
+                              lp.patientId,
+                              l.Name,
+                              l.PhoneNumber,
+                              lp.StatusNum,
+                              Results = lp.Results.Replace("\n", "").Replace("\r", "")
+                          };
+            return Ok(results);
+        }
+
+        [HttpPost("LabResults")]
+        public async Task<ActionResult> PostLabResults(int patientId, string results)
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
+
+            var patientToHistory = await _context.LabPatients
+                    .SingleOrDefaultAsync(x => x.LabId == userId && x.PatientId == patientId);
+
+            var patientHistory = new LabHistory
             {
-                item.StatusNum = 1;
-                await _context.SaveChangesAsync();
-            }
+                labId = userId,
+                patientId = patientId,
+                TestId = patientToHistory.TestId,
+                Results = results,
+                Price = patientToHistory.Price,
+                StatusNum = 1,
+            };
+            _context.LabPatients.Remove(patientToHistory);
+            await _context.LabHistories.AddAsync(patientHistory);
+            await _context.SaveChangesAsync();
 
             return Ok("Patient Completed Tests !");
         }
@@ -189,12 +199,20 @@ namespace VirtualClinic.Controllers
             var userId = user.Id;
 
             var patientToDelete = await _context.LabPatients
-                    .Where(x => x.LabId == userId && x.PatientId == id).ToListAsync();
-            foreach ( var item in patientToDelete )
+                    .SingleOrDefaultAsync(x => x.LabId == userId && x.PatientId == id);
+
+            var patientHistory = new LabHistory
             {
-                item.StatusNum = 2;
-                await _context.SaveChangesAsync();
-            }
+                labId = userId,
+                patientId = id,
+                TestId = patientToDelete.TestId,
+                Results = patientToDelete.Results,
+                Price = patientToDelete.Price,
+                StatusNum = 2,
+            };
+            _context.LabPatients.Remove(patientToDelete);
+            await _context.LabHistories.AddAsync(patientHistory);
+            await _context.SaveChangesAsync();
 
             return Ok("Patient Cancelled Successfully !");
         }

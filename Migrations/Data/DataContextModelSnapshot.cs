@@ -40,7 +40,7 @@ namespace VirtualClinic.Migrations.Data
 
                     b.HasIndex("DoctorId");
 
-                    b.ToTable("Appointments");
+                    b.ToTable("Appointments", (string)null);
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.Doctor", b =>
@@ -93,7 +93,7 @@ namespace VirtualClinic.Migrations.Data
 
                     b.HasKey("Id");
 
-                    b.ToTable("Doctors");
+                    b.ToTable("Doctors", (string)null);
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.DoctorHistory", b =>
@@ -121,7 +121,7 @@ namespace VirtualClinic.Migrations.Data
 
                     b.HasKey("Id");
 
-                    b.ToTable("DoctorHistories");
+                    b.ToTable("DoctorHistories", (string)null);
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.DoctorPatient", b =>
@@ -145,7 +145,7 @@ namespace VirtualClinic.Migrations.Data
 
                     b.HasIndex("patientId");
 
-                    b.ToTable("DoctorPatients");
+                    b.ToTable("DoctorPatients", (string)null);
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.DoctorReviews", b =>
@@ -167,7 +167,7 @@ namespace VirtualClinic.Migrations.Data
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("DoctorReviews");
+                    b.ToTable("DoctorReviews", (string)null);
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.Lab", b =>
@@ -198,7 +198,7 @@ namespace VirtualClinic.Migrations.Data
 
                     b.HasKey("Id");
 
-                    b.ToTable("Labs");
+                    b.ToTable("Labs", (string)null);
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.LabHistory", b =>
@@ -229,7 +229,7 @@ namespace VirtualClinic.Migrations.Data
 
                     b.HasKey("Id");
 
-                    b.ToTable("LabHistories");
+                    b.ToTable("LabHistories", (string)null);
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.LabPatient", b =>
@@ -256,7 +256,7 @@ namespace VirtualClinic.Migrations.Data
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("LabPatients");
+                    b.ToTable("LabPatients", (string)null);
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.LabReviews", b =>
@@ -278,7 +278,7 @@ namespace VirtualClinic.Migrations.Data
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("LabReviews");
+                    b.ToTable("LabReviews", (string)null);
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.LabsTestsAndRisks", b =>
@@ -296,7 +296,7 @@ namespace VirtualClinic.Migrations.Data
 
                     b.HasIndex("TestsAndRisksId");
 
-                    b.ToTable("LabsTestsAndRisks");
+                    b.ToTable("LabsTestsAndRisks", (string)null);
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.Patient", b =>
@@ -348,7 +348,7 @@ namespace VirtualClinic.Migrations.Data
 
                     b.HasKey("Id");
 
-                    b.ToTable("Patients");
+                    b.ToTable("Patients", (string)null);
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.PatientTestsOrRisks", b =>
@@ -363,7 +363,7 @@ namespace VirtualClinic.Migrations.Data
 
                     b.HasIndex("TestTestsAndRisksId");
 
-                    b.ToTable("PatientTestsAndRisks");
+                    b.ToTable("PatientTestsAndRisks", (string)null);
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.PatientTestsOrRisksOcr", b =>
@@ -378,7 +378,7 @@ namespace VirtualClinic.Migrations.Data
 
                     b.HasIndex("TestTestsAndRisksId");
 
-                    b.ToTable("PatientTestsOrRisksOcrs");
+                    b.ToTable("PatientTestsOrRisksOcrs", (string)null);
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.TestsAndRisks", b =>
@@ -395,7 +395,7 @@ namespace VirtualClinic.Migrations.Data
 
                     b.HasKey("Id");
 
-                    b.ToTable("testsAndRisks");
+                    b.ToTable("testsAndRisks", (string)null);
                 });
 
             modelBuilder.Entity("VirtualClinic.Entities.Appointment", b =>

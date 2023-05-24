@@ -357,8 +357,15 @@ namespace VirtualClinic.Controllers
                 DoctorNotes = "No Notes For Now !"
             };
 
-            await _context.DoctorPatients.AddAsync(doctorPatient);
-            await _context.SaveChangesAsync();
+            if ( patientDoctor )
+            {
+                return BadRequest("Doctor Already Assigned");
+            }
+            else
+            {
+                await _context.DoctorPatients.AddAsync(doctorPatient);
+                await _context.SaveChangesAsync();
+            }
 
             return Ok("Doctor Assigned Successfully !");
         }
@@ -409,7 +416,7 @@ namespace VirtualClinic.Controllers
                               tr.Area,
                               tr.Id,
                               tr.Duration,
-                              tr.DoctorInfo,
+                              DoctorInfo = tr.DoctorInfo.Replace("\n", "").Replace("\r", ""),
                               tr.Education,
                               tr.TimeFrom,
                               tr.TimeTo,
@@ -446,7 +453,7 @@ namespace VirtualClinic.Controllers
                               tr.Area,
                               tr.Id,
                               tr.Duration,
-                              tr.DoctorInfo,
+                              DoctorInfo = tr.DoctorInfo.Replace("\n", "").Replace("\r", ""),
                               tr.Education,
                               tr.TimeFrom,
                               tr.TimeTo,
@@ -477,8 +484,15 @@ namespace VirtualClinic.Controllers
                 Results = "No Results For Now !"
             };
 
-            await _context.LabPatients.AddAsync(labPatient);
-            await _context.SaveChangesAsync();
+            if ( patientLab )
+            {
+                return BadRequest("Lab Already Signed");
+            }
+            else
+            {
+                await _context.LabPatients.AddAsync(labPatient);
+                await _context.SaveChangesAsync();
+            }
 
             return Ok("Lab Assigned Successfully !");
         }
@@ -502,42 +516,48 @@ namespace VirtualClinic.Controllers
                           {
                               lp.Price,
                               lp.LabId,
+                              lp.PatientId,
                               TestName = t.TestsOrRisks,
                               lp.TestId,
                               l.Area,
                               l.Photo,
                               LabName = l.Name,
-                              lp.StatusNum
+                              lp.StatusNum,
+                              Results = lp.Results.Replace("\n", "").Replace("\r", "")
                           };
             return Ok(results);
         }
 
-        //[HttpGet("ViewLabsHistory")]
-        //public async Task<ActionResult> ViewLabsHistory()
-        //{
-        //    string email = User.FindFirstValue(ClaimTypes.Email);
-        //    var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
-        //    var userId = user.Id;
+        [HttpGet("ViewLabsHistory")]
+        public async Task<ActionResult> ViewLabsHistory()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            var userId = user.Id;
 
-        //    var ids = from ptr in _context.LabHistories
-        //              where ptr.patientId == userId
-        //              select ptr.labId;
+            var ids = from ptr in _context.LabHistories
+                      where ptr.patientId == userId
+                      select ptr.labId;
 
-        //    var results = from lp in _context.LabHistories
-        //                  join t in _context.testsAndRisks on lp.TestId equals t.Id
-        //                  join l in _context.Labs on lp.labId equals l.Id
-        //                  where lp.patientId == user.Id
-        //                  select new
-        //                  {
-        //                      lp.Price,
-        //                      TestName = t.TestsOrRisks,
-        //                      LabName = l.Name,
-        //                      lp.StatusNum,
-        //                      lp.Results,
-        //                      lp.TestId
-        //                  };
-        //    return Ok(results);
-        //}
+            var results = from lp in _context.LabHistories
+                          join t in _context.testsAndRisks on lp.TestId equals t.Id
+                          join l in _context.Labs on lp.labId equals l.Id
+                          where lp.patientId == user.Id
+                          select new
+                          {
+                              lp.Price,
+                              lp.labId,
+                              lp.patientId,
+                              TestName = t.TestsOrRisks,
+                              lp.TestId,
+                              l.Area,
+                              l.Photo,
+                              LabName = l.Name,
+                              lp.StatusNum,
+                              Results = lp.Results.Replace("\n", "").Replace("\r", "")
+                          };
+            return Ok(results);
+        }
 
         [HttpGet("GetLabTests")]
         public async Task<ActionResult> GetLabTests(int labId)
@@ -876,14 +896,21 @@ namespace VirtualClinic.Controllers
             var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
             var userId = user.Id;
 
-            var labPatientDelete = await _context.LabPatients
-   .Where(x => x.PatientId == userId && x.LabId == id).ToListAsync();
+            var patientToDelete = await _context.LabPatients
+                    .SingleOrDefaultAsync(x => x.LabId == id && x.PatientId == userId);
 
-            foreach ( var item in labPatientDelete )
+            var patientHistory = new LabHistory
             {
-                item.StatusNum = 2;
-                await _context.SaveChangesAsync();
-            }
+                labId = id,
+                patientId = userId,
+                TestId = patientToDelete.TestId,
+                Results = patientToDelete.Results,
+                Price = patientToDelete.Price,
+                StatusNum = 2,
+            };
+            _context.LabPatients.Remove(patientToDelete);
+            await _context.LabHistories.AddAsync(patientHistory);
+            await _context.SaveChangesAsync();
 
             return Ok("Lab Deleted Successfully !");
         }
