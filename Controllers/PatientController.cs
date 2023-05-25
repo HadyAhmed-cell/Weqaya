@@ -1,13 +1,12 @@
 ﻿using AForge.Imaging.Filters;
-using Amazon;
-using Amazon.Textract;
-using Amazon.Textract.Model;
+using Azure;
+using Azure.AI.FormRecognizer;
+using Azure.AI.FormRecognizer.Models;
+using Google.Cloud.Vision.V1;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Globalization;
 using System.Security.Claims;
 using VirtualClinic.Data;
 using VirtualClinic.Entities;
@@ -17,12 +16,27 @@ namespace VirtualClinic.Controllers
     public class PatientController : BaseApiController
     {
         private readonly DataContext _context;
-        private readonly IAmazonTextract _amazonTextract;
+
+        //private readonly ImageAnnotatorClient _visionClient;
+        private readonly FormRecognizerClient _formRecognizerClient;
+
+        //private readonly IAmazonTextract _amazonTextract;
 
         public PatientController(DataContext context)
         {
             _context = context;
-            _amazonTextract = new AmazonTextractClient(RegionEndpoint.USEast1);
+
+            string formRecognizerApiKey = "4d97b1b94ee046fc84a2a3e63edb1893";
+            string formRecognizerEndpoint = "https://hadyahmed2550001362000.cognitiveservices.azure.com/";
+
+            // Create FormRecognizerClient
+            _formRecognizerClient = new FormRecognizerClient(new Uri(formRecognizerEndpoint), new AzureKeyCredential(formRecognizerApiKey));
+            //var builder = new ImageAnnotatorClientBuilder
+            //{
+            //    CredentialsPath = "../VirtualClinic/apiKey.json"
+            //};
+            //_visionClient = builder.Build();
+            //_amazonTextract = ;
         }
 
         [HttpGet]
@@ -590,7 +604,7 @@ namespace VirtualClinic.Controllers
                 return BadRequest("Image file is required.");
             }
 
-            using var memoryStream = new MemoryStream();
+            var memoryStream = new MemoryStream();
             await image.CopyToAsync(memoryStream);
 
             var sourceImage = new Bitmap(memoryStream);
@@ -608,27 +622,31 @@ namespace VirtualClinic.Controllers
 
             // Save the processed image back to the memory stream
             var processedMemoryStream = new MemoryStream();
-            processedImage.Save(processedMemoryStream, ImageFormat.Jpeg);
+            processedImage.Save(processedMemoryStream, System.Drawing.Imaging.ImageFormat.Jpeg);
             processedMemoryStream.Position = 0;
 
-            var request = new DetectDocumentTextRequest
-            {
-                Document = new Amazon.Textract.Model.Document
-                {
-                    Bytes = memoryStream
-                }
-            };
+            //var request = new DetectDocumentTextRequest
+            //{
+            //    Document = new Amazon.Textract.Model.Document
+            //    {
+            //        Bytes = memoryStream
+            //    }
+            //};
 
             try
             {
-                var response = await _amazonTextract.DetectDocumentTextAsync(request);
-
-                var extractedText = "";
-                foreach ( var block in response.Blocks )
+                var options = new RecognizeContentOptions()
                 {
-                    if ( block.BlockType == BlockType.LINE )
+                    ContentType = FormContentType.Jpeg
+                };
+
+                Response<FormPageCollection> response = await _formRecognizerClient.StartRecognizeContent(processedMemoryStream, options).WaitForCompletionAsync();
+                var extractedText = "";
+                foreach ( var formPage in response.Value )
+                {
+                    foreach ( var line in formPage.Lines )
                     {
-                        extractedText += block.Text + Environment.NewLine;
+                        extractedText += line.Text + " ";
                     }
                 }
 
@@ -769,7 +787,22 @@ namespace VirtualClinic.Controllers
                 }
 
                 return Ok("Tests Scanned Successfully");
+
+                //return Ok(extractedText);
             }
+
+            //try
+            //{
+            //    var response = await _ironTesseract.(request);
+
+            //    var extractedText = "";
+            //    foreach ( var block in response.Blocks )
+            //    {
+            //        if ( block.BlockType == BlockType.LINE )
+            //        {
+            //            extractedText += block.Text + Environment.NewLine;
+            //        }
+            //    }
             catch ( Exception ex )
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);

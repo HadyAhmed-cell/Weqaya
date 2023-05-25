@@ -18,7 +18,8 @@
     <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="AWSSDK.Textract" Version="3.7.105.30" />
-    <PackageReference Include="IronOcr" Version="2023.5.35" />
+    <PackageReference Include="Azure.AI.FormRecognizer" Version="4.0.0" />
+    <PackageReference Include="Google.Cloud.Vision.V1" Version="3.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="7.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.5" />
