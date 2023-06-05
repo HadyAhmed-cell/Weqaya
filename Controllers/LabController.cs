@@ -290,7 +290,8 @@ namespace VirtualClinic.Controllers
                 .Select(o => new
                 {
                     o.Patient.Name,
-                    o.ReviewsComments
+                    o.ReviewsComments,
+                    o.Reviews
                 });
             var avgReviews = await _context.LabReviews.AverageAsync(p => p.Reviews);
 
