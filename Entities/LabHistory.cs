@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-
-namespace VirtualClinic.Entities
+﻿namespace VirtualClinic.Entities
 {
     public class LabHistory
     {

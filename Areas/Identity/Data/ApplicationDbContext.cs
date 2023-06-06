@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using VirtualClinic.Entities;
 using VirtualClinic.Identity;
 
 namespace VirtualClinic.Areas.Identity.Data;

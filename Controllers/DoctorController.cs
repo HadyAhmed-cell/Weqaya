@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using System.Security.Claims;
 using VirtualClinic.Data;
 using VirtualClinic.Entities;
@@ -270,6 +269,9 @@ namespace VirtualClinic.Controllers
                     x.Area,
                     x.StreetAddress,
                     x.Photo,
+                    Reviews = _context.DoctorReviews
+                .Where(r => r.DoctorId == x.Id)
+                .Average(r => r.Reviews),
                     //    Appointments = _context.Appointments
                     //.Where(a => a.DoctorId == x.Id)
                     //.Select(a => new

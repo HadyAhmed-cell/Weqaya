@@ -1,13 +1,10 @@
 using Amazon.Textract;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Configuration;
 using System.Text.Json.Serialization;
 using VirtualClinic.Areas.Identity.Data;
 using VirtualClinic.Data;
 using VirtualClinic.Extensions;
-using VirtualClinic.Identity;
 using VirtualClinic.Interfaces;
 using VirtualClinic.Repositories;
 using VirtualClinic.Services;

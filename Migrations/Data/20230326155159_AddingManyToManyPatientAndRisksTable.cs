@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -11,8 +10,6 @@ namespace VirtualClinic.Migrations.Data
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-           
-
             migrationBuilder.CreateTable(
                 name: "GeoLocation",
                 columns: table => new

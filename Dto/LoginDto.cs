@@ -1,5 +1,4 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace VirtualClinic.Dto
 {
@@ -7,8 +6,8 @@ namespace VirtualClinic.Dto
     {
         [Required]
         public string Email { get; set; }
-        [Required, DataType(DataType.Password)]
 
+        [Required, DataType(DataType.Password)]
         public string Password { get; set; }
     }
 }

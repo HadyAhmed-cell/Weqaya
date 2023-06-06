@@ -5,46 +5,46 @@
 namespace VirtualClinic.Migrations.Data
 {
     /// <inheritdoc />
-    public partial class ConvertingIntToDouble : Migration
+    public partial class ConvertingBackToInt : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<double>(
+            migrationBuilder.AlterColumn<int>(
                 name: "Reviews",
                 table: "LabReviews",
-                type: "float",
+                type: "int",
                 nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int");
+                oldClrType: typeof(double),
+                oldType: "float");
 
-            migrationBuilder.AlterColumn<double>(
+            migrationBuilder.AlterColumn<int>(
                 name: "Reviews",
                 table: "DoctorReviews",
-                type: "float",
+                type: "int",
                 nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int");
+                oldClrType: typeof(double),
+                oldType: "float");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<int>(
+            migrationBuilder.AlterColumn<double>(
                 name: "Reviews",
                 table: "LabReviews",
-                type: "int",
+                type: "float",
                 nullable: false,
-                oldClrType: typeof(double),
-                oldType: "float");
+                oldClrType: typeof(int),
+                oldType: "int");
 
-            migrationBuilder.AlterColumn<int>(
+            migrationBuilder.AlterColumn<double>(
                 name: "Reviews",
                 table: "DoctorReviews",
-                type: "int",
+                type: "float",
                 nullable: false,
-                oldClrType: typeof(double),
-                oldType: "float");
+                oldClrType: typeof(int),
+                oldType: "int");
         }
     }
 }

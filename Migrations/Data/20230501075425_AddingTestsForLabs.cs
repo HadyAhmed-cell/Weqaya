@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -11,7 +10,6 @@ namespace VirtualClinic.Migrations.Data
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-
             migrationBuilder.CreateTable(
                 name: "LabsTestsAndRisks",
                 columns: table => new
@@ -37,12 +35,10 @@ namespace VirtualClinic.Migrations.Data
                         onDelete: ReferentialAction.Cascade);
                 });
 
- 
             migrationBuilder.CreateIndex(
                 name: "IX_LabsTestsAndRisks_TestsAndRisksId",
                 table: "LabsTestsAndRisks",
                 column: "TestsAndRisksId");
-
         }
 
         /// <inheritdoc />

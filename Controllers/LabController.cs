@@ -237,7 +237,15 @@ namespace VirtualClinic.Controllers
                 labs = labs.Where(l => l.Area.Contains(area));
             }
 
-            var result = await labs.ToListAsync();
+            var result = await labs
+        .Select(l => new
+        {
+            Lab = l,
+            Reviews = _context.LabReviews
+                .Where(r => r.LabId == l.Id)
+                .Average(r => r.Reviews)
+        })
+        .ToListAsync();
 
             if ( !result.Any() )
             {
