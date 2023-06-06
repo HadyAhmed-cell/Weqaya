@@ -248,7 +248,14 @@ namespace VirtualClinic.Controllers
             var result = await labs
         .Select(l => new
         {
-            Lab = l,
+            l.Area,
+            l.LabDescript,
+            l.Name,
+            l.Id,
+            l.Photo,
+            l.Email,
+            l.StreetAddress,
+
             Avg = _context.LabReviews
                 .Where(r => r.LabId == l.Id)
                 .Average(r => r.Reviews)
