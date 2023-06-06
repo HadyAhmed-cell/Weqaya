@@ -83,7 +83,15 @@ namespace VirtualClinic.Controllers
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
+
             var userId = user.Id;
+            var avgReviews = await _context.LabReviews.Where(p => p.LabId == userId).AverageAsync(p => p.Reviews);
+
+            var result = new
+            {
+                user,
+                Avg = avgReviews
+            };
 
             return Ok(user);
         }
@@ -241,7 +249,7 @@ namespace VirtualClinic.Controllers
         .Select(l => new
         {
             Lab = l,
-            Reviews = _context.LabReviews
+            Avg = _context.LabReviews
                 .Where(r => r.LabId == l.Id)
                 .Average(r => r.Reviews)
         })

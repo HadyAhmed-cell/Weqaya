@@ -25,8 +25,8 @@ namespace VirtualClinic.Controllers
         {
             _context = context;
 
-            string formRecognizerApiKey = "sdfbsedfgvsdfvasdfv";
-            string formRecognizerEndpoint = "qawerfasdfverfgaerv";
+            string formRecognizerApiKey = "drghsrtgsergsedrg";
+            string formRecognizerEndpoint = "aergsdrfgbsertgsertg";
 
             // Create FormRecognizerClient
             _formRecognizerClient = new FormRecognizerClient(new Uri(formRecognizerEndpoint), new AzureKeyCredential(formRecognizerApiKey));
@@ -69,7 +69,7 @@ namespace VirtualClinic.Controllers
         o.ReviewsComments,
         o.Reviews
     });
-            var avgReviews = await _context.DoctorReviews.AverageAsync(p => p.Reviews);
+            var avgReviews = await _context.DoctorReviews.Where(p => p.DoctorId == id).AverageAsync(p => p.Reviews);
 
             var result = new
             {
@@ -111,7 +111,7 @@ namespace VirtualClinic.Controllers
         o.ReviewsComments,
         o.Reviews
     });
-            var avgReviews = await _context.DoctorReviews.AverageAsync(p => p.Reviews);
+            var avgReviews = await _context.DoctorReviews.Where(p => p.DoctorId == id).AverageAsync(p => p.Reviews);
 
             var result = new
             {
@@ -149,7 +149,7 @@ namespace VirtualClinic.Controllers
         o.ReviewsComments,
         o.Reviews
     });
-            var avgReviews = await _context.LabReviews.AverageAsync(p => p.Reviews);
+            var avgReviews = await _context.LabReviews.Where(p => p.LabId == id).AverageAsync(p => p.Reviews);
 
             var result = new
             {
@@ -159,8 +159,8 @@ namespace VirtualClinic.Controllers
                 lab.Photo,
                 lab.StreetAddress,
                 lab.LabDescript,
-                Avg = avgReviews,
-                Reviews = reviews,
+                Avg = avgReviews
+
                 //labTests
             };
 
@@ -184,7 +184,7 @@ namespace VirtualClinic.Controllers
         o.ReviewsComments,
         o.Reviews
     });
-            var avgReviews = await _context.LabReviews.AverageAsync(p => p.Reviews);
+            var avgReviews = await _context.LabReviews.Where(p => p.LabId == id).AverageAsync(p => p.Reviews);
 
             var result = new
             {
