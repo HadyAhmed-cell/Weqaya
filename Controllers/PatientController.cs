@@ -25,8 +25,8 @@ namespace VirtualClinic.Controllers
         {
             _context = context;
 
-            string formRecognizerApiKey = "34dfvedfgwefwef";
-            string formRecognizerEndpoint = "345trg34f234f234f";
+            string formRecognizerApiKey = "4d97b1b94ee046fc84a2a3e63edb1893";
+            string formRecognizerEndpoint = "https://hadyahmed2550001362000.cognitiveservices.azure.com/";
 
             // Create FormRecognizerClient
             _formRecognizerClient = new FormRecognizerClient(new Uri(formRecognizerEndpoint), new AzureKeyCredential(formRecognizerApiKey));
@@ -62,6 +62,15 @@ namespace VirtualClinic.Controllers
                 .Select(a => a.AppointmentDateTime.ToString())
                 .ToListAsync();
 
+            var reviews = _context.DoctorReviews.Include(x => x.Patient).Where(p => p.DoctorId == id)
+    .Select(o => new
+    {
+        o.Patient.Name,
+        o.ReviewsComments,
+        o.Reviews
+    });
+            var avgReviews = await _context.DoctorReviews.AverageAsync(p => p.Reviews);
+
             var result = new
             {
                 doctor.Name,
@@ -77,8 +86,37 @@ namespace VirtualClinic.Controllers
                 doctor.Area,
                 doctor.StreetAddress,
                 doctor.Photo,
+                Avg = avgReviews,
 
                 appointments
+            };
+
+            return Ok(result);
+        }
+
+        [HttpGet("GetDoctorReviewsById")]
+        public async Task<ActionResult> GetDoctorReviewsById(int id)
+        {
+            var lab = await _context.Doctors.FindAsync(id);
+
+            if ( lab == null )
+            {
+                return NotFound();
+            }
+
+            var reviews = _context.DoctorReviews.Include(x => x.Patient).Where(p => p.DoctorId == id)
+    .Select(o => new
+    {
+        o.Patient.Name,
+        o.ReviewsComments,
+        o.Reviews
+    });
+            var avgReviews = await _context.DoctorReviews.AverageAsync(p => p.Reviews);
+
+            var result = new
+            {
+                Avg = avgReviews,
+                Reviews = reviews,
             };
 
             return Ok(result);
@@ -104,6 +142,15 @@ namespace VirtualClinic.Controllers
                                       lt.Price
                                   }).ToListAsync();
 
+            var reviews = _context.LabReviews.Include(x => x.Patient).Where(p => p.LabId == id)
+    .Select(o => new
+    {
+        o.Patient.Name,
+        o.ReviewsComments,
+        o.Reviews
+    });
+            var avgReviews = await _context.LabReviews.AverageAsync(p => p.Reviews);
+
             var result = new
             {
                 lab.Name,
@@ -112,6 +159,37 @@ namespace VirtualClinic.Controllers
                 lab.Photo,
                 lab.StreetAddress,
                 lab.LabDescript,
+                Avg = avgReviews,
+                Reviews = reviews,
+                //labTests
+            };
+
+            return Ok(result);
+        }
+
+        [HttpGet("GetLabReviewsById")]
+        public async Task<ActionResult> GetLabReviewsById(int id)
+        {
+            var lab = await _context.Labs.FindAsync(id);
+
+            if ( lab == null )
+            {
+                return NotFound();
+            }
+
+            var reviews = _context.LabReviews.Include(x => x.Patient).Where(p => p.LabId == id)
+    .Select(o => new
+    {
+        o.Patient.Name,
+        o.ReviewsComments,
+        o.Reviews
+    });
+            var avgReviews = await _context.LabReviews.AverageAsync(p => p.Reviews);
+
+            var result = new
+            {
+                Avg = avgReviews,
+                Reviews = reviews,
                 //labTests
             };
 
