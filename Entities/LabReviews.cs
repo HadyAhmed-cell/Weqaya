@@ -2,7 +2,7 @@
 {
     public class LabReviews
     {
-        public int Reviews { get; set; }
+        public double Reviews { get; set; }
         public string ReviewsComments { get; set; }
         public int LabId { get; set; }
         public Lab Lab { get; set; }

@@ -26,8 +26,8 @@ namespace VirtualClinic.Controllers
         {
             _context = context;
 
-            string formRecognizerApiKey = "************";
-            string formRecognizerEndpoint = "*****************";
+            string formRecognizerApiKey = "kajshdkjqghwujkdbnqjwikd";
+            string formRecognizerEndpoint = "asdhjqwbdhjkqbwkdhj";
 
             // Create FormRecognizerClient
             _formRecognizerClient = new FormRecognizerClient(new Uri(formRecognizerEndpoint), new AzureKeyCredential(formRecognizerApiKey));
@@ -949,7 +949,7 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPost("DoctorReviews")]
-        public async Task<ActionResult> PostDoctorReviews(int id, int reviews, string comments = "No Comments")
+        public async Task<ActionResult> PostDoctorReviews(int id, double reviews, string comments = "No Comments")
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
@@ -970,7 +970,7 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpPost("LabReviews")]
-        public async Task<ActionResult> PostLabReviews(int id, int reviews, string comments = "No Comments")
+        public async Task<ActionResult> PostLabReviews(int id, double reviews, string comments = "No Comments")
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
