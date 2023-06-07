@@ -25,8 +25,8 @@ namespace VirtualClinic.Controllers
         {
             _context = context;
 
-            string formRecognizerApiKey = "srfthasedfvgaserfawerf";
-            string formRecognizerEndpoint = "dstfghnsrfgvbasetghsetgf";
+            string formRecognizerApiKey = "dfghsdfgsdfgsdfg";
+            string formRecognizerEndpoint = "asdfgsdfvbsdfvsdfv";
 
             // Create FormRecognizerClient
             _formRecognizerClient = new FormRecognizerClient(new Uri(formRecognizerEndpoint), new AzureKeyCredential(formRecognizerApiKey));
@@ -235,6 +235,19 @@ namespace VirtualClinic.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(patient);
+        }
+
+        [HttpGet("CheckUserData")]
+        public async Task<ActionResult> CheckUserData()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var Num = 0;
+            var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
+            if ( user != null )
+            {
+                Num = 1;
+            }
+            return Ok(new { statusNum = Num });
         }
 
         [HttpPut("EditPatientData")]

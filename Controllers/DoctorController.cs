@@ -35,6 +35,19 @@ namespace VirtualClinic.Controllers
             return Ok("Doctor Added Successfully !");
         }
 
+        [HttpGet("CheckUserData")]
+        public async Task<ActionResult> CheckUserData()
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            var Num = 0;
+            var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
+            if ( user != null )
+            {
+                Num = 1;
+            }
+            return Ok(new { statusNum = Num });
+        }
+
         [HttpPost("AddPhoto")]
         public async Task<ActionResult> AddPhoto(IFormFile file)
         {
