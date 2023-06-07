@@ -85,12 +85,14 @@ namespace VirtualClinic.Controllers
             var user = await _context.Labs.FirstOrDefaultAsync(x => x.Email == email);
 
             var userId = user.Id;
-            var avgReviews = await _context.LabReviews.Where(p => p.LabId == userId).AverageAsync(p => p.Reviews);
+            //var avgReviews = await _context.LabReviews.Where(p => p.LabId == userId).AverageAsync(p => p.Reviews);
 
             var result = new
             {
                 user,
-                Avg = avgReviews
+                Avg = _context.LabReviews
+            .Where(r => r.LabId == userId)
+            .Average(r => (double?)r.Reviews) ?? 0
             };
 
             return Ok(user);
@@ -258,7 +260,7 @@ namespace VirtualClinic.Controllers
 
             Avg = _context.LabReviews
                 .Where(r => r.LabId == l.Id)
-                .Average(r => r.Reviews)
+                .Average(r => (double?)r.Reviews) ?? 0,
         })
         .ToListAsync();
 

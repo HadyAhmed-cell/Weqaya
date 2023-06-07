@@ -27,6 +27,9 @@ namespace VirtualClinic.Controllers
             doctor.Photo = new byte[byte.MaxValue];
             string email = User.FindFirstValue(ClaimTypes.Email);
             doctor.Email = email;
+            DoctorReviews reviews = new DoctorReviews()
+            {
+            };
             await _context.SaveChangesAsync();
 
             return Ok("Doctor Added Successfully !");
@@ -97,7 +100,10 @@ namespace VirtualClinic.Controllers
             var user = await _context.Doctors.FirstOrDefaultAsync(x => x.Email == email);
 
             var userId = user.Id;
-            var avgReviews = await _context.DoctorReviews.Where(p => p.DoctorId == userId).AverageAsync(p => p.Reviews);
+            //var reviews = await _context.DoctorReviews.AnyAsync(p => p.DoctorId == userId);
+            //var avgReviews = 0;
+
+            //var avgReviews =await _context.DoctorReviews.Where(p => p.DoctorId == userId).AverageAsync(p => p.Reviews);
 
             if ( user == null )
             {
@@ -107,7 +113,9 @@ namespace VirtualClinic.Controllers
             var result = new
             {
                 user,
-                Avg = avgReviews
+                Avg = _context.DoctorReviews
+            .Where(r => r.DoctorId == userId)
+            .Average(r => (double?)r.Reviews) ?? 0
             };
             return Ok(user);
         }
@@ -279,7 +287,7 @@ namespace VirtualClinic.Controllers
                     x.Photo,
                     Avg = _context.DoctorReviews
                 .Where(r => r.DoctorId == x.Id)
-                .Average(r => r.Reviews),
+                .Average(r => (double?)r.Reviews) ?? 0,
                     //    Appointments = _context.Appointments
                     //.Where(a => a.DoctorId == x.Id)
                     //.Select(a => new

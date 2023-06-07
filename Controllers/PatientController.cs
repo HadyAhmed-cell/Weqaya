@@ -25,8 +25,8 @@ namespace VirtualClinic.Controllers
         {
             _context = context;
 
-            string formRecognizerApiKey = "sdfgsedfvsdffvsedrfg";
-            string formRecognizerEndpoint = "ertgsdfgsedfgvaewsdrvc";
+            string formRecognizerApiKey = "srfthasedfvgaserfawerf";
+            string formRecognizerEndpoint = "dstfghnsrfgvbasetghsetgf";
 
             // Create FormRecognizerClient
             _formRecognizerClient = new FormRecognizerClient(new Uri(formRecognizerEndpoint), new AzureKeyCredential(formRecognizerApiKey));
@@ -69,8 +69,9 @@ namespace VirtualClinic.Controllers
         o.ReviewsComments,
         o.Reviews
     });
-            var avgReviews = await _context.DoctorReviews.Where(p => p.DoctorId == id).AverageAsync(p => p.Reviews);
-
+            var avgReviews = await _context.DoctorReviews
+        .Where(p => p.DoctorId == id)
+        .AverageAsync(p => (double?)p.Reviews) ?? 0;
             var result = new
             {
                 doctor.Name,
@@ -104,14 +105,22 @@ namespace VirtualClinic.Controllers
                 return NotFound();
             }
 
+            //var reviewsToCheck = _context.DoctorReviews.Any(p => p.DoctorId == id);
+
+            //if ( !reviewsToCheck )
+            //{
+            //}
+
             var reviews = _context.DoctorReviews.Include(x => x.Patient).Where(p => p.DoctorId == id)
     .Select(o => new
     {
-        o.Patient.Name,
-        o.ReviewsComments,
-        o.Reviews
+        Name = o.Patient != null ? o.Patient.Name : "No Patient Reviewed Yet",
+        ReviewsComments = o.ReviewsComments ?? "No Comments",
+        Reviews = o.Reviews
     });
-            var avgReviews = await _context.DoctorReviews.Where(p => p.DoctorId == id).AverageAsync(p => p.Reviews);
+            var avgReviews = await _context.DoctorReviews
+        .Where(p => p.DoctorId == id)
+        .AverageAsync(p => (double?)p.Reviews) ?? 0;
 
             var result = new
             {
@@ -149,7 +158,9 @@ namespace VirtualClinic.Controllers
         o.ReviewsComments,
         o.Reviews
     });
-            var avgReviews = await _context.LabReviews.Where(p => p.LabId == id).AverageAsync(p => p.Reviews);
+            var avgReviews = await _context.LabReviews
+       .Where(p => p.LabId == id)
+       .AverageAsync(p => (double?)p.Reviews) ?? 0;
 
             var result = new
             {
@@ -178,13 +189,15 @@ namespace VirtualClinic.Controllers
             }
 
             var reviews = _context.LabReviews.Include(x => x.Patient).Where(p => p.LabId == id)
-    .Select(o => new
-    {
-        o.Patient.Name,
-        o.ReviewsComments,
-        o.Reviews
-    });
-            var avgReviews = await _context.LabReviews.Where(p => p.LabId == id).AverageAsync(p => p.Reviews);
+      .Select(o => new
+      {
+          Name = o.Patient != null ? o.Patient.Name : "No Patient Reviewed Yet",
+          ReviewsComments = o.ReviewsComments ?? "No Comments",
+          Reviews = o.Reviews
+      });
+            var avgReviews = await _context.LabReviews
+        .Where(p => p.LabId == id)
+        .AverageAsync(p => (double?)p.Reviews) ?? 0;
 
             var result = new
             {
