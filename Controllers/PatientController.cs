@@ -25,8 +25,8 @@ namespace VirtualClinic.Controllers
         {
             _context = context;
 
-            string formRecognizerApiKey = "dfghsdfgsdfgsdfg";
-            string formRecognizerEndpoint = "asdfgsdfvbsdfvsdfv";
+            string formRecognizerApiKey = "sdfgasdvadfgbadsfvas";
+            string formRecognizerEndpoint = "adfbhsfdgbadsfvasdfv";
 
             // Create FormRecognizerClient
             _formRecognizerClient = new FormRecognizerClient(new Uri(formRecognizerEndpoint), new AzureKeyCredential(formRecognizerApiKey));
@@ -969,7 +969,7 @@ namespace VirtualClinic.Controllers
         }
 
         [HttpGet("SearchedLabsWithPatientTests")]
-        public async Task<ActionResult> SearchLabs()
+        public async Task<ActionResult> SearchLabs(string area = null)
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _context.Patients.FirstOrDefaultAsync(x => x.Email == email);
@@ -983,12 +983,23 @@ namespace VirtualClinic.Controllers
 
             // Retrieve the labs that have the same tests
             var labsWithTotalPrice = _context.LabsTestsAndRisks
-                .Where(ltr => patientTests.Contains(ltr.TestsAndRisksId))
+                .Where(ltr => patientTests.Contains(ltr.TestsAndRisksId) && area.Contains(ltr.Lab.Area))
                 .GroupBy(ltr => ltr.Lab)
                 .Select(g => new
                 {
-                    LabName = g.Key.Name,
-                    TotalPrice = g.Sum(ltr => ltr.Price)
+                    g.Key.Name,
+                    g.Key.LabDescript,
+                    g.Key.Area,
+                    g.Key.Id,
+                    g.Key.Photo,
+                    g.Key.StreetAddress,
+                    g.Key.Email,
+
+                    Avg = _context.LabReviews
+                .Where(r => r.LabId == g.Key.Id)
+                .Average(r => (double?)r.Reviews) ?? 0,
+
+                    //TotalPrice = g.Sum(ltr => ltr.Price)
                 })
                 .ToList();
 
