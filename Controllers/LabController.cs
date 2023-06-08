@@ -125,7 +125,7 @@ namespace VirtualClinic.Controllers
                         select new
                         {
                             TestsAvailable = g.FirstOrDefault().TestsOrRisks,
-                            TestPrice = g.FirstOrDefault().LabsTestsAndRisks.FirstOrDefault().Price
+                            TestPrice = g.FirstOrDefault(t => t.LabsTestsAndRisks.Any(ltr => ltr.LabId == userId)).LabsTestsAndRisks.FirstOrDefault(ltr => ltr.LabId == userId).Price
                         };
             return Ok(tests);
         }

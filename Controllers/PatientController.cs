@@ -25,8 +25,8 @@ namespace VirtualClinic.Controllers
         {
             _context = context;
 
-            string formRecognizerApiKey = "sdfgasdvadfgbadsfvas";
-            string formRecognizerEndpoint = "adfbhsfdgbadsfvasdfv";
+            string formRecognizerApiKey = "asedfasdfsadf";
+            string formRecognizerEndpoint = "sdfgvadsfasdfsdf";
 
             // Create FormRecognizerClient
             _formRecognizerClient = new FormRecognizerClient(new Uri(formRecognizerEndpoint), new AzureKeyCredential(formRecognizerApiKey));
@@ -685,13 +685,14 @@ namespace VirtualClinic.Controllers
 
             var tests = from tr in _context.testsAndRisks
                         join ty in _context.LabsTestsAndRisks on tr.Id equals ty.TestsAndRisksId
-                        where ty.LabId == userId
+                        where ty.LabId == labId
                         group tr by tr.Id into g
                         select new
                         {
                             g.FirstOrDefault().Id,
                             TestsAvailable = g.FirstOrDefault().TestsOrRisks,
-                            TestPrice = g.FirstOrDefault().LabsTestsAndRisks.FirstOrDefault().Price
+                            TestPrice = g.FirstOrDefault(t => t.LabsTestsAndRisks.Any(ltr => ltr.LabId == labId)).LabsTestsAndRisks.FirstOrDefault(ltr => ltr.LabId == labId).Price
+                            //TestPrice = g.FirstOrDefault().LabsTestsAndRisks.FirstOrDefault().Price
                         };
             return Ok(tests);
         }
