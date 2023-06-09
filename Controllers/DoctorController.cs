@@ -347,18 +347,20 @@ namespace VirtualClinic.Controllers
             var userId = user.Id;
 
             var reviews = _context.DoctorReviews.Include(x => x.Patient).Where(p => p.DoctorId == userId)
-                .Select(o => new
-                {
-                    o.Patient.Name,
-                    o.ReviewsComments,
-                    o.Reviews
-                });
-            var avgReviews = await _context.DoctorReviews.AverageAsync(p => p.Reviews);
+               .Select(o => new
+               {
+                   Name = o.Patient != null ? o.Patient.Name : "No Patient Reviewed Yet",
+                   ReviewsComments = o.ReviewsComments ?? "No Comments",
+                   o.Reviews
+               });
+            var avgReviews = await _context.DoctorReviews
+        .Where(p => p.DoctorId == userId)
+        .AverageAsync(p => (double?)p.Reviews) ?? 0.0;
 
             var result = new
             {
                 Avg = avgReviews,
-                Reviews = reviews
+                Reviews = reviews,
             };
 
             return Ok(result);

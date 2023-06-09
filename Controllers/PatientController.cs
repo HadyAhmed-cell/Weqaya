@@ -25,8 +25,8 @@ namespace VirtualClinic.Controllers
         {
             _context = context;
 
-            string formRecognizerApiKey = "easdrtgadesfvasdf";
-            string formRecognizerEndpoint = "adsfgvasdcvasdfcv";
+            string formRecognizerApiKey = "aedfasdfasdf";
+            string formRecognizerEndpoint = "asedrfgasdfasdfs";
 
             // Create FormRecognizerClient
             _formRecognizerClient = new FormRecognizerClient(new Uri(formRecognizerEndpoint), new AzureKeyCredential(formRecognizerApiKey));
