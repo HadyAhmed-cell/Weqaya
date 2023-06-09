@@ -25,8 +25,8 @@ namespace VirtualClinic.Controllers
         {
             _context = context;
 
-            string formRecognizerApiKey = "asedfasdfsadf";
-            string formRecognizerEndpoint = "sdfgvadsfasdfsdf";
+            string formRecognizerApiKey = "easdrtgadesfvasdf";
+            string formRecognizerEndpoint = "adsfgvasdcvasdfcv";
 
             // Create FormRecognizerClient
             _formRecognizerClient = new FormRecognizerClient(new Uri(formRecognizerEndpoint), new AzureKeyCredential(formRecognizerApiKey));
@@ -71,7 +71,7 @@ namespace VirtualClinic.Controllers
     });
             var avgReviews = await _context.DoctorReviews
         .Where(p => p.DoctorId == id)
-        .AverageAsync(p => (double?)p.Reviews) ?? 0;
+        .AverageAsync(p => (double?)p.Reviews) ?? 0.0;
             var result = new
             {
                 doctor.Name,
@@ -120,7 +120,7 @@ namespace VirtualClinic.Controllers
     });
             var avgReviews = await _context.DoctorReviews
         .Where(p => p.DoctorId == id)
-        .AverageAsync(p => (double?)p.Reviews) ?? 0;
+        .AverageAsync(p => (double?)p.Reviews) ?? 0.0;
 
             var result = new
             {
@@ -160,7 +160,7 @@ namespace VirtualClinic.Controllers
     });
             var avgReviews = await _context.LabReviews
        .Where(p => p.LabId == id)
-       .AverageAsync(p => (double?)p.Reviews) ?? 0;
+       .AverageAsync(p => (double?)p.Reviews) ?? 0.0;
 
             var result = new
             {
@@ -197,7 +197,7 @@ namespace VirtualClinic.Controllers
       });
             var avgReviews = await _context.LabReviews
         .Where(p => p.LabId == id)
-        .AverageAsync(p => (double?)p.Reviews) ?? 0;
+        .AverageAsync(p => (double?)p.Reviews) ?? 0.0;
 
             var result = new
             {
@@ -998,7 +998,7 @@ namespace VirtualClinic.Controllers
 
                     Avg = _context.LabReviews
                 .Where(r => r.LabId == g.Key.Id)
-                .Average(r => (double?)r.Reviews) ?? 0,
+                .Average(r => (double?)r.Reviews) ?? 0.0,
 
                     //TotalPrice = g.Sum(ltr => ltr.Price)
                 })

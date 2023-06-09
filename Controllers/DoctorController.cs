@@ -128,7 +128,7 @@ namespace VirtualClinic.Controllers
                 user,
                 Avg = _context.DoctorReviews
             .Where(r => r.DoctorId == userId)
-            .Average(r => (double?)r.Reviews) ?? 0
+            .Average(r => (double?)r.Reviews) ?? 0.0
             };
             return Ok(user);
         }
@@ -300,7 +300,7 @@ namespace VirtualClinic.Controllers
                     x.Photo,
                     Avg = _context.DoctorReviews
                 .Where(r => r.DoctorId == x.Id)
-                .Average(r => (double?)r.Reviews) ?? 0,
+                .Average(r => (double?)r.Reviews) ?? 0.0,
                     //    Appointments = _context.Appointments
                     //.Where(a => a.DoctorId == x.Id)
                     //.Select(a => new

@@ -105,7 +105,7 @@ namespace VirtualClinic.Controllers
                 user,
                 Avg = _context.LabReviews
             .Where(r => r.LabId == userId)
-            .Average(r => (double?)r.Reviews) ?? 0
+            .Average(r => (double?)r.Reviews) ?? 0.0
             };
 
             return Ok(user);
@@ -273,7 +273,7 @@ namespace VirtualClinic.Controllers
 
             Avg = _context.LabReviews
                 .Where(r => r.LabId == l.Id)
-                .Average(r => (double?)r.Reviews) ?? 0,
+                .Average(r => (double?)r.Reviews) ?? 0.0,
         })
         .ToListAsync();
 
