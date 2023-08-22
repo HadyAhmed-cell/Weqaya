@@ -1,3 +1,5 @@
+# Weqaya
+
 Weqaya Professional Medical App:
 
 Summary:
@@ -16,4 +18,3 @@ Recommendation System for patients that takes important info from patient and up
 - Integrated With Microsoft Azure "Form Recognizer" To Use OCR Algorithm For Scanning Prescriptions
 - Ability For Patient To Book Doctor Or Lab Visit With Reviewing System
 
-# Weqaya
